@@ -11,3 +11,8 @@
 + De la misma forma que el anterior son practicas que se hicieron en Cloudera 5.7, con variaciones sobre el tipico ejemplo del wordcount.
 + Aplican los mismos requisitos que en el proyecto anterior y se tiene una guia (Guia_Ejercicios.odt) donde explican paso a paso como ejecutar los MR, e interpretarlos.
 
+### 3. Practises-FLUME, Practises-PIG, Practises-HIVE y Practises-SQOOP  
+* En estas carpetas encontraras guias para trabajar con las diferentes herramientas. En la mayoria tendras unos ejercicios basicos y unos ejercicios avanzados (los cuales recomiendo seguir). Solo necesitas una distribucion de cloudera en la cual tendras instaladas por defecto estas herramientas. Para FLUME(Interceptores) y HIVE(UDFs) tendras tambien proyectos JAVA.
+
+### 4. Practises-AVRO  
+* Algunos ejercicios faciles para manejar avro y conversiones avro-json, no necesitas Cloudera te vale con cualquier distribucion Linux o UNIX que tenga una JDK.
