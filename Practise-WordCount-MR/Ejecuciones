@@ -1,0 +1,17 @@
+hadoop jar ejercicioEvaluable-0.0.1-SNAPSHOT.jar com.mbit.wordCountPubli.DriverWordCountPubli ejerc_evaluable/inputFiles/allPapers ejerc_evaluable/outputFiles/wordcountpubli
+
+hadoop jar ejercicioEvaluable-0.0.1-SNAPSHOT.jar com.mbit.wordCountStopWord.DriverWordCountStopWord ejerc_evaluable/inputFiles/allPapers ejerc_evaluable/outputFiles/wordcountstopword ejerc_evaluable/inputStopWords/stopwords_en.txt
+
+hadoop jar ejercicioEvaluable-0.0.1-SNAPSHOT.jar com.mbit.countNumPubliByAutor.DriverCountNumPubliByAutor ejerc_evaluable/inputFiles/allPapers ejerc_evaluable/outputFiles/countnumpublibyautor
+
+hadoop jar ejercicioEvaluable-0.0.1-SNAPSHOT.jar com.mbit.countNumPubliSolitario.DriverCountNumPubliSolitario ejerc_evaluable/inputFiles/allPapers ejerc_evaluable/outputFiles/countnumpublibysolitario
+
+hadoop jar ejercicioEvaluable-0.0.1-SNAPSHOT.jar com.mbit.countNumPubliEquipo.DriverCountNumPubliEquipo ejerc_evaluable/inputFiles/allPapers ejerc_evaluable/outputFiles/countnumpublibyequipo
+
+hadoop jar ejercicioEvaluable-0.0.1-SNAPSHOT.jar com.mbit.top5word.DriverTop5Word ejerc_evaluable/inputFiles/allPapers ejerc_evaluable/outputFiles/top5word ejerc_evaluable/inputStopWords/stopwords_en.txt
+
+hadoop fs -mkdir ejerc_evaluable/inputTop5/
+hadoop fs -cp ejerc_evaluable/outputFiles/top5word/part-r-00000 ejerc_evaluable/inputTop5/top5.txt
+
+hadoop jar ejercicioEvaluable-0.0.1-SNAPSHOT.jar com.mbit.autorestop5word.DriverAutoresTop5Word ejerc_evaluable/inputFiles/allPapers ejerc_evaluable/outputFiles/autorestop5word ejerc_evaluable/inputStopWords/stopwords_en.txt ejerc_evaluable/inputTop5/top5.txt
+

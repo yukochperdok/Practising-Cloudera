@@ -1,0 +1,5 @@
+database	5
+applications	3
+based	2
+prolog	2
+relational	2
