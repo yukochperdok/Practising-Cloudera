@@ -1,0 +1,279 @@
+1274476	Dualcore	Wireless G Router	8249	7899	2
+1274477	Texi	Wireless G USB Adapter	5609	5394	1
+1274478	Homertech	Wireless G USB Adapter	5839	5069	1
+1274479	BDT	Wireless G USB Adapter	5859	5455	1
+1274480	Dualcore	Wireless N Router	6889	5528	2
+1274481	Bigdeal	Wireless N Router	6959	5850	2
+1274482	Dualcore	Wireless N USB Adapter	6559	5897	1
+1274483	Homertech	Wireless N USB Adapter	6629	5709	1
+1274484	Wolfpack	Wireless N USB Adapter	6739	6012	1
+1274485	Duff	Wireless N USB Adapter	6489	5317	1
+1274486	Foocorp	Wireless G Access Point	8669	7402	3
+1274487	Wolfpack	Wireless G Access Point	8749	8629	3
+1274488	Texi	Wireless G Access Point	8599	7331	3
+1274489	BDT	Cable Modem	6639	5085	1
+1274490	Texi	Cable Modem	6829	6286	1
+1274491	Texi	DSL Modem	6779	6675	1
+1274492	Foocorp	DSL Modem	6879	6185	1
+1274493	TPS	Firewall	27339	22016	1
+1274494	Foocorp	Firewall	27029	20215	1
+1274495	Wolfpack	Firewall	28039	23650	1
+1274496	BDT	Firewall	27909	23378	1
+1274497	Homertech	VPN Appliance (16 Client license)	23019	18263	1
+1274498	Dualcore	VPN Appliance (16 Client license)	22699	21178	1
+1274499	Duff	VPN Appliance (50 Clienti license)	50029	46269	1
+1274500	Dualcore	VPN Appliance (50 Clienti license)	48049	45578	1
+1274501	TPS	VPN Appliance (50 Clienti license)	50159	40551	1
+1274502	BuckLogix	VPN Appliance (250 Clienti license)	227269	179375	1
+1274503	Foocorp	VPN Appliance (250 Clienti license)	229329	188813	1
+1274504	Texi	Network Hub (10 MBps, 4-port)	1949	1847	1
+1274505	Foocorp	Network Hub (10 MBps, 8-port)	2989	2754	1
+1274506	BDT	Network Hub (10 MBps, 16-port)	4109	3220	1
+1274507	XYZ	Network Switch (100 MBps, 4-port)	4169	4013	1
+1274508	Bigdeal	Network Switch (100 MBps, 4-port)	4199	4019	1
+1274509	Bigdeal	Network Switch (100 MBps, 8-port)	4509	3513	1
+1274510	Bigdeal	Network Switch (100 MBps, 8-port)	4519	3607	1
+1274511	BDT	Network Switch (100 MBps, 16-port)	4949	4617	1
+1274512	XYZ	Network Switch (Gigabit, 8-port)	7029	5709	1
+1274513	Duff	Network Switch (Gigabit, 8-port)	6639	5125	1
+1274514	Dualcore	Network Switch (Gigabit, 8-port)	6899	6292	1
+1274515	Wolfpack	Network Switch (Gigabit, 16-port)	7799	7717	1
+1274516	Wolfpack	Network Switch (Gigabit, 16-port)	7889	7780	1
+1274517	BDT	Network Switch (Gigabit, 16-port)	7869	6055	1
+1274518	BDT	Network Switch (Gigabit, 16-port)	7669	7156	1
+1274519	Duff	Network Switch (Gigabit, 16-port)	7989	6729	1
+1274520	Duff	Network Switch (Gigabit, 24-port)	12789	10339	1
+1274521	Wolfpack	Network Switch (Gigabit, 24-port)	12929	11978	1
+1274522	BuckLogix	Network Switch (Gigabit, 24-port)	12729	10446	1
+1274523	Duff	Network Switch (Gigabit, 24-port)	13159	12967	1
+1274524	XYZ	Dial-up Modem (14.4K)	1939	1489	1
+1274525	TPS	Dial-up Modem (33.6K)	2389	2228	1
+1274526	Texi	Dial-up Modem (56K)	4019	3865	1
+1274527	BDT	Ethernet NIC (100 MBps)	4319	3583	1
+1274528	BuckLogix	Ethernet NIC (Gigabit)	5929	4795	1
+1274529	Dualcore	Ethernet NIC (Gigabit)	6139	4762	1
+1274530	Homertech	Ethernet NIC (Gigabit)	6039	5625	1
+1274531	TPS	Ethernet NIC (Gigabit)	5979	4993	1
+1274532	Foocorp	Ethernet NIC (Gigabit)	6039	4594	1
+1274533	BDT	Ethernet NIC (Gigabit)	6179	5122	1
+1274534	BuckLogix	Ethernet NIC (Gigabit)	6139	4732	1
+1274535	Homertech	Ethernet NIC (Gigabit)	5909	5661	1
+1274536	Dualcore	Ethernet NIC (10 Gigabit)	18939	17366	1
+1274537	Foocorp	Ethernet NIC (10 Gigabit)	18319	14880	1
+1274538	ACME	Dot Matrix Printer	29719	27447	41
+1274539	Olde-Gray	Daisy Wheel Printer	27839	20810	34
+1274540	McDowell	Inkjet Printer	17649	16764	9
+1274541	Tyrell	Inkjet Printer	18539	16732	9
+1274542	McDowell	Inkjet Printer	17729	13552	9
+1274543	Tyrell	Inkjet Printer	17689	17310	9
+1274544	ACME	Inkjet Printer	18169	13605	9
+1274545	Tyrell	Inkjet Printer	18439	18053	9
+1274546	McDowell	Inkjet Printer	17699	15673	9
+1274547	Olde-Gray	Inkjet Printer	17669	14038	9
+1274548	Tyrell	Inkjet Printer	17799	17270	9
+1274549	Tyrell	Inkjet Printer	18579	17973	9
+1274550	Tyrell	Inkjet Printer	17999	14019	9
+1274551	McDowell	Inkjet Printer	17839	14788	9
+1274552	McDowell	Inkjet Photo Printer	23419	17431	7
+1274553	Tyrell	Inkjet Photo Printer	24129	18002	7
+1274554	ACME	Laser Printer (Black-and-White)	39279	31674	31
+1274555	McDowell	Laser Printer (Black-and-White)	39019	36876	31
+1274556	Olde-Gray	Laser Printer (Black-and-White)	38189	37088	31
+1274557	Tyrell	Laser Printer (Black-and-White)	37969	28523	31
+1274558	ACME	Laser Printer (Black-and-White)	40059	38784	31
+1274559	McDowell	Laser Printer (Black-and-White)	39579	29910	31
+1274560	ACME	Laser Printer (Black-and-White)	38319	34530	31
+1274561	McDowell	Laser Printer (Black-and-White)	40399	39837	31
+1274562	McDowell	Laser Printer (Black-and-White)	37629	29410	31
+1274563	Tyrell	Laser Printer (Black-and-White)	39689	33816	31
+1274564	McDowell	Laser Printer (Black-and-White)	39559	31085	31
+1274565	Olde-Gray	Laser Printer (Black-and-White)	37899	36642	31
+1274566	ACME	Laser Printer (Black-and-White)	37839	32607	31
+1274567	ACME	Laser Printer (Black-and-White)	37889	37628	31
+1274568	McDowell	Laser Printer (Black-and-White, Duplex)	66679	59875	45
+1274569	Tyrell	Laser Printer (Black-and-White, Duplex)	71149	62077	45
+1274570	Tyrell	Laser Printer (Black-and-White, Duplex)	69899	54866	45
+1274571	Tyrell	Laser Printer (Color)	39309	35057	36
+1274572	Tyrell	Laser Printer (Color)	38059	34921	36
+1274573	ACME	Laser Printer (Color)	38849	33450	36
+1274574	ACME	Laser Printer (Color)	38459	37690	36
+1274575	McDowell	Laser Printer (Color, Duplex)	47229	37531	49
+1274576	ACME	Laser Printer (Color, Duplex)	48039	43947	49
+1274577	McDowell	Wide Format Printer	87719	74148	97
+1274578	Olde-Gray	Wide Format Printer	87619	81846	97
+1274579	ACME	Scanner	27769	24312	12
+1274580	McDowell	Scanner	28309	21912	12
+1274581	Tyrell	Scanner	27549	21920	12
+1274582	Olde-Gray	Scanner	27979	21917	12
+1274583	Olde-Gray	Scanner	27349	22603	12
+1274584	McDowell	Scanner	28349	21925	12
+1274585	Olde-Gray	All-in-one Print/Fax/Scan/Copy	28059	21258	16
+1274586	McDowell	All-in-one Print/Fax/Scan/Copy	27729	24100	16
+1274587	Olde-Gray	All-in-one Print/Fax/Scan/Copy	27379	26297	16
+1274588	Olde-Gray	All-in-one Print/Fax/Scan/Copy	27569	23156	16
+1274589	McDowell	All-in-one Print/Scan/Copy	23029	18112	14
+1274590	ACME	All-in-one Print/Scan/Copy	23369	18610	14
+1274591	Byteweasel	Virus Scanner (incl. updates for one year)	2859	2369	1
+1274592	DevNull	Virus Scanner (incl. updates for one year)	2919	2169	1
+1274593	DevNull	Virus Scanner (incl. updates for one year)	2849	2254	1
+1274594	DevNull	Virus Scanner (incl. updates for two years)	3759	3743	1
+1274595	DevNull	Virus Scanner (incl. updates for two years)	3619	3066	1
+1274596	Weebits	Virus Scanner (incl. updates for three years)	4629	4352	1
+1274597	Byteweasel	Virus Scanner (incl. updates for three years)	4869	3568	1
+1274598	Byteweasel	Office Suite (Student Edition)	13519	8724	2
+1274599	Bytefortress	Office Suite (Home Edition)	23259	14413	2
+1274600	Byteweasel	Office Suite (Basic Edition)	33989	33012	2
+1274601	Bitbucket	Office Suite (Basic Edition)	32149	31914	2
+1274602	DevNull	Office Suite (Enterprise Edition)	50539	43694	2
+1274603	Dorx	6 GB IDE Disk	5209	4428	2
+1274604	Krustybitz	20 GB PATA Disk	6219	5933	2
+1274605	United Digistuff	60 GB PATA Disk	8719	6381	2
+1274606	DevNull	9.1 GB SCSI Disk	8229	8069	3
+1274607	Byteweasel	SCSI Terminator	4109	2969	2
+1274608	Homertech	SCSI Terminator	3909	2981	2
+1274609	Dorx	SCSI Terminator	4059	3713	2
+1274610	United Digistuff	173 GB SAS Disk	49459	47647	3
+1274611	United Digistuff	173 GB SAS Disk	47419	41755	3
+1274612	Krustybitz	173 GB SAS Disk	48519	36508	3
+1274613	Megachango	173 GB SAS Disk	48709	43041	3
+1274614	United Digistuff	500 GB SATA3 Disk	8579	6768	2
+1274615	Orion	500 GB SATA3 Disk	8989	8904	2
+1274616	Homertech	500 GB SATA3 Disk	9159	8613	2
+1274617	Krustybitz	750 GB SATA3 Disk	10399	7262	2
+1274618	Krustybitz	750 GB SATA3 Disk	10209	8771	2
+1274619	United Digistuff	750 GB SATA3 Disk	10469	7147	2
+1274620	Orion	750 GB SATA3 Disk	9919	8547	2
+1274621	Spindown	1.0 TB SATA3 Disk	10509	8230	2
+1274622	Megachango	1.0 TB SATA3 Disk	11159	10860	2
+1274623	Lemmon	1.0 TB SATA3 Disk	10679	6812	2
+1274624	Krustybitz	1.0 TB SATA3 Disk	10749	9021	2
+1274625	Spindown	1.0 TB SATA3 Disk	11089	8371	2
+1274626	United Digistuff	1.0 TB SATA3 Disk (10K RPM)	15219	9661	2
+1274627	Tortoise	1.0 TB SATA3 Disk (10K RPM)	15619	11821	2
+1274628	ACME	1.0 TB SATA3 Disk (10K RPM)	15029	13405	2
+1274629	Bitbucket	1.5 TB SATA3 Disk	13319	8687	2
+1274630	United Digistuff	1.5 TB SATA3 Disk	12619	8110	2
+1274631	United Digistuff	1.5 TB SATA3 Disk	12369	8179	2
+1274632	Homertech	1.5 TB SATA3 Disk	13219	8704	2
+1274633	Dualcore	1.5 TB SATA3 Disk	13419	11894	2
+1274634	Dualcore	1.5 TB SATA3 Disk	12619	9867	2
+1274635	Dualcore	1.5 TB SATA3 Disk	13059	8496	2
+1274636	Wolfpack	2.0 TB SATA3 Disk	14409	9501	2
+1274637	Byteweasel	2.0 TB SATA3 Disk	14939	12627	2
+1274638	Dorx	2.0 TB SATA3 Disk	14469	13328	2
+1274639	DevNull	2.0 TB SATA3 Disk	14289	11133	2
+1274640	ACME	2.0 TB SATA3 Disk	14759	10138	2
+1274641	Tortoise	2.0 TB SATA3 Disk	14289	11368	2
+1274642	Tortoise	2.0 TB SATA3 Disk (10K RPM)	19429	17315	2
+1274643	ACME	2.0 TB SATA3 Disk (10K RPM)	19219	15418	2
+1274644	Tortoise	2.0 TB SATA3 Disk (10K RPM)	19319	12342	2
+1274645	Megachango	3.0 TB SATA3 Disk	18789	17066	2
+1274646	Wolfpack	3.0 TB SATA3 Disk	18229	13020	2
+1274647	Bitbucket	3.0 TB SATA3 Disk	18799	12989	2
+1274648	Dorx	3.0 TB SATA3 Disk	18879	16672	2
+1274649	DevNull	3.0 TB SATA3 Disk	18379	13935	2
+1274650	Orion	4 GB USB Flash Drive 	1979	1610	1
+1274651	Orion	4 GB USB Flash Drive 	2009	1908	1
+1274652	Dorx	4 GB USB Flash Drive 	1929	1917	1
+1274653	Bitbucket	4 GB USB Flash Drive 	2029	1436	1
+1274654	Homertech	4 GB USB Flash Drive 	1949	1944	1
+1274655	Lemmon	4 GB USB Flash Drive 	2039	1567	1
+1274656	Spindown	8 GB USB Flash Drive 	2759	2176	1
+1274657	DevNull	8 GB USB Flash Drive 	2849	2680	1
+1274658	United Digistuff	8 GB USB Flash Drive 	2799	2788	1
+1274659	Bitbucket	8 GB USB Flash Drive 	2779	2325	1
+1274660	ElCheapo	8 GB USB Flash Drive 	2679	2269	1
+1274661	United Digistuff	8 GB USB Flash Drive 	2939	2500	1
+1274662	Bitbucket	8 GB USB Flash Drive 	2679	2107	1
+1274663	Dorx	8 GB USB Flash Drive 	2879	2545	1
+1274664	Byteweasel	16 GB USB Flash Drive	4039	2826	1
+1274665	Dorx	16 GB USB Flash Drive	4019	2642	1
+1274666	Bitbucket	16 GB USB Flash Drive	3929	2774	1
+1274667	ElCheapo	16 GB USB Flash Drive	4059	3320	1
+1274668	Spindown	16 GB USB Flash Drive	3949	3703	1
+1274669	Byteweasel	16 GB USB Flash Drive	3989	2934	1
+1274670	Spindown	16 GB USB Flash Drive	3859	3447	1
+1274671	Homertech	16 GB USB Flash Drive	4079	3631	1
+1274672	ACME	16 GB USB Flash Drive	4049	3864	1
+1274673	Orion	16 GB USB Flash Drive (Red)	42999	4001	1
+1274674	Orion	16 GB USB Flash Drive (Green)	4299	4001	1
+1274675	Orion	16 GB USB Flash Drive (Blue)	4299	4001	1
+1274676	Dorx	32 GB USB Flash Drive	5639	5479	1
+1274677	Homertech	32 GB USB Flash Drive	6199	4365	1
+1274678	Tortoise	32 GB USB Flash Drive	5839	4907	1
+1274679	Megachango	32 GB USB Flash Drive	5629	4040	1
+1274680	Lemmon	32 GB USB Flash Drive	5869	5849	1
+1274681	Krustybitz	32 GB USB Flash Drive	5779	5193	1
+1274682	Tortoise	32 GB USB Flash Drive (High Performance)	6929	6905	1
+1274683	Megachango	32 GB USB Flash Drive (High Performance)	6919	4362	1
+1274684	Megachango	64 GB USB Flash Drive	8799	6378	1
+1274685	Megachango	64 GB USB Flash Drive	8959	6389	1
+1274686	Dorx	64 GB USB Flash Drive	8669	8414	1
+1274687	Byteweasel	64 GB USB Flash Drive	9169	5906	1
+1274688	Krustybitz	64 GB USB Flash Drive	9339	9308	1
+1274689	Dorx	1 TB NAS Server	16769	14689	12
+1274690	Orion	1 TB NAS Server	16239	11587	12
+1274691	Wolfpack	4 TB NAS Server	29799	22652	13
+1274692	Megachango	4 TB NAS Server	31159	20263	13
+1274693	Lemmon	8 TB NAS Server	46179	40997	14
+1274694	Lemmon	DLT-III Tape Backup Drive (SCSI)	58159	39502	10
+1274695	Dualcore	DLT-III Tape Backup Drive (SCSI)	62179	50389	10
+1274696	Dorx	LTO Tape Backup Drive (SCSI)	79969	52545	9
+1274697	Spindown	LTO Tape Backup Drive (SCSI)	79959	58132	9
+1274698	ACME	500 GB Portable External USB 2.0 Disk	7609	7155	3
+1274699	DevNull	500 GB Portable External USB 2.0 Disk	8299	7776	3
+1274700	Megachango	500 GB Portable External USB 3.0 Disk	9929	6865	3
+1274701	Wolfpack	500 GB Portable External USB 3.0 Disk	9539	7776	3
+1274702	ElCheapo	500 GB Portable External USB 3.0 Disk	10489	7629	3
+1274703	Megachango	500 GB Portable External USB 3.0 Disk	10489	9530	3
+1274704	Dualcore	750 GB Portable External USB 3.0 Disk	12409	11733	3
+1274705	Bitbucket	750 GB Portable External USB 3.0 Disk	12889	10524	3
+1274706	Krustybitz	750 GB Portable External USB 3.0 Disk	12729	10127	3
+1274707	Bitbucket	32 GB SSD Disk	15599	10195	2
+1274708	Homertech	32 GB SSD Disk	14789	12061	2
+1274709	Krustybitz	32 GB SSD Disk	14699	10569	2
+1274710	ElCheapo	32 GB SSD Disk	15129	14216	2
+1274711	DevNull	64 GB SSD Disk	21509	20806	2
+1274712	Krustybitz	64 GB SSD Disk	21619	17181	2
+1274713	Tortoise	64 GB SSD Disk	22109	19570	2
+1274714	Megachango	64 GB SSD Disk	22829	18154	2
+1274715	Megachango	64 GB SSD Disk	22479	15069	2
+1274716	ACME	64 GB SSD Disk	21929	18968	2
+1274717	United Digistuff	64 GB SSD Disk	22129	14043	2
+1274718	Bitbucket	128 GB SSD Disk	40539	35401	2
+1274719	Spindown	128 GB SSD Disk	38689	32068	2
+1274720	Spindown	1 GB Compact Flash	1199	957	1
+1274721	Orion	2 GB Compact Flash	1939	1442	1
+1274722	Spindown	2 GB Compact Flash	1889	1287	1
+1274723	Krustybitz	2 GB Compact Flash	1949	1285	1
+1274724	Megachango	4 GB Compact Flash	2689	1745	1
+1274725	Spindown	4 GB Compact Flash	2699	1958	1
+1274726	Megachango	1 GB Micro SD	799	544	1
+1274727	Dualcore	2 GB Micro SD	979	709	1
+1274728	Megachango	2 GB Micro SD	1019	774	1
+1274729	Orion	4 GB Micro SD	1239	1123	1
+1274730	Krustybitz	4 GB Micro SD	1329	908	1
+1274731	Tortoise	4 GB Micro SD	1259	1022	1
+1274732	Byteweasel	4 GB Micro SD	1279	1064	1
+1274733	Megachango	8 GB Micro SD	2989	2119	1
+1274734	Dorx	8 GB Micro SD	2959	2584	1
+1274735	Dualcore	8 GB Micro SD	2809	2541	1
+1274736	ACME	8 GB Micro SD	2829	2590	1
+1274737	Wolfpack	8 GB Micro SD	2819	2148	1
+1274738	DevNull	8 GB Micro SD	2849	2409	1
+1274739	Dorx	8 GB Micro SD	2839	2658	1
+1274740	ElCheapo	16 GB Micro SD	4289	3136	1
+1274741	Dorx	16 GB Micro SD	4329	3442	1
+1274742	Bitbucket	16 GB Micro SD	4579	3662	1
+1274743	Dualcore	16 GB Micro SD	4309	3893	1
+1274744	United Digistuff	16 GB Micro SD	4479	3170	1
+1274745	ACME	16 GB Micro SD (High Performance)	5849	4418	1
+1274746	DevNull	16 GB Micro SD (High Performance)	5619	4691	1
+1274747	DevNull	32 GB Micro SD	6059	5643	1
+1274748	Lemmon	32 GB Micro SD	6009	5939	1
+1274749	United Digistuff	32 GB Micro SD	5989	5949	1
+1274750	Megachango	32 GB Micro SD (High Performance)	7089	5924	1
+1274751	Krustybitz	32 GB Micro SD (High Performance)	7219	5798	1
+1274752	Dorx	64 GB Micro SD	9859	8419	1
+1274753	Homertech	64 GB Micro SD	9809	9738	1
+1274754	Wolfpack	64 GB Micro SD	10209	7785	1

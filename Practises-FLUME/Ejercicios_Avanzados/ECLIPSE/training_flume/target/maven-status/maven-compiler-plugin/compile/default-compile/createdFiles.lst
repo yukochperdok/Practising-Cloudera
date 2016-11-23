@@ -1,0 +1,4 @@
+com/mbit/interceptors/CustomHostInterceptor$Builder.class
+com/mbit/interceptors/CustomLocationInterceptor$Builder.class
+com/mbit/interceptors/CustomLocationInterceptor.class
+com/mbit/interceptors/CustomHostInterceptor.class

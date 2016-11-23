@@ -1,0 +1,15 @@
+#
+#Options file for sqoop import
+#
+
+import
+--connect
+jdbc:mysql://localhost/retail_db
+--username
+root
+--password
+cloudera
+
+#
+#All other commands should be specified in the command line
+

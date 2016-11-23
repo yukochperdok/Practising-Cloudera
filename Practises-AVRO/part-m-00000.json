@@ -1,0 +1,16 @@
+{
+  "name" : {
+    "string" : "db.version"
+  },
+  "data" : {
+    "string" : "3"
+  }
+}
+{
+  "name" : {
+    "string" : "oozie.version"
+  },
+  "data" : {
+    "string" : "4.1.0-cdh5.7.0"
+  }
+}

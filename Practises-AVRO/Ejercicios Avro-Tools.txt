@@ -1,0 +1,352 @@
+Pagina de descargas:
+Aqui te puedes descargar todas las distribuciones de Avro y en cada una todos los paquetes que necesites. Yo utilizare el avro tools para generar avros y modificarlos a JSON:
+http://ftp.cixug.es/apache/avro/
+
+De esta pagina te puedes descargar algun avro, schemas y json de ejemplo
+http://www.michael-noll.com/blog/2013/03/17/reading-and-writing-avro-files-from-the-command-line/
+
+
+
+1. Ejecutamos el jar sin paramentros para ver la ayuda:
+
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar
+Version 1.7.7 of Apache Avro
+Copyright 2010 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+C JSON parsing provided by Jansson and
+written by Petri Lehtinen. The original software is
+available from http://www.digip.org/jansson/.
+----------------
+Available tools:
+          cat  extracts samples from files
+      compile  Generates Java code for the given schema.
+       concat  Concatenates avro files without re-compressing.
+   fragtojson  Renders a binary-encoded Avro datum as JSON.
+     fromjson  Reads JSON records and writes an Avro data file.
+     fromtext  Imports a text file into an avro data file.
+      getmeta  Prints out the metadata of an Avro data file.
+    getschema  Prints out schema of an Avro data file.
+          idl  Generates a JSON schema from an Avro IDL file
+ idl2schemata  Extract JSON schemata of the types from an Avro IDL file
+       induce  Induce schema/protocol from Java class/interface via reflection.
+   jsontofrag  Renders a JSON-encoded Avro datum as binary.
+       random  Creates a file with randomly generated instances of a schema.
+      recodec  Alters the codec of a data file.
+  rpcprotocol  Output the protocol of a RPC service
+   rpcreceive  Opens an RPC Server and listens for one message.
+      rpcsend  Sends a single RPC message.
+       tether  Run a tethered mapreduce job.
+       tojson  Dumps an Avro data file as JSON, record per line or pretty.
+       totext  Converts an Avro data file to a text file.
+     totrevni  Converts an Avro data file to a Trevni file.
+  trevni_meta  Dumps a Trevni file's metadata as JSON.
+trevni_random  Create a Trevni file filled with random instances of a schema.
+trevni_tojson  Dumps a Trevni file as JSON.
+
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar fromjson
+Expected 1 arg: input_file
+Option                                  Description                            
+------                                  -----------                            
+--codec                                 Compression codec (default: null)      
+--level <Integer>                       Compression level (only applies to     
+                                          deflate and xz) (default: -1)        
+--schema                                Schema                                 
+--schema-file                           Schema File                            
+
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar tojson
+tojson --pretty input-file
+   converts Avro data file to JSON.
+Option                                  Description                            
+------                                  -----------                            
+--pretty                                Turns on pretty printing.  
+
+
+2. Visualizamos el AVRO de partida
+
+[cloudera@quickstart AVRO]$ cat twitter.avro
+Objavro.codenullavro.schema�{"type":"record","name":"twitter_schema","namespace":"com.miguno.avro","fields":[{"name":"username","type":"string","doc":"Name of the user account on Twitter.com"},{"name":"tweet","type":"string","doc":"The content of the user's Twitter message"},{"name":"timestamp","type":"long","doc":"Unix epoch time in milliseconds"}],"doc:":"A basic schema for storing Twitter messages"}�7����,Hz[������
+                                                                                           migunoFRock: Nerf paper, scissors is fine.��
+BlizzardCSFWorks as intended.  Terran is IMBA.��
+�7����,Hz[����[cloudera@quickstart AVRO]$ 
+
+
+
+3. Mirar schema que tiene un AVRO:
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar getschema twitter.avro
+{
+  "type" : "record",
+  "name" : "twitter_schema",
+  "namespace" : "com.miguno.avro",
+  "fields" : [ {
+    "name" : "username",
+    "type" : "string",
+    "doc" : "Name of the user account on Twitter.com"
+  }, {
+    "name" : "tweet",
+    "type" : "string",
+    "doc" : "The content of the user's Twitter message"
+  }, {
+    "name" : "timestamp",
+    "type" : "long",
+    "doc" : "Unix epoch time in milliseconds"
+  } ],
+  "doc:" : "A basic schema for storing Twitter messages"
+}
+
+
+Y lo podemos guardar:
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar getschema twitter.avro > twitter.avsc
+[cloudera@quickstart AVRO]$ ls -ltr
+total 12256
+-rwxrw-rw- 1 cloudera cloudera      548 Sep  7 10:32 twitter.avro
+-rwxrw-rw- 1 cloudera cloudera 12527927 Sep  8 03:40 avro-tools-1.7.7.jar
+-rw-rw-r-- 1 cloudera cloudera      403 Sep  8 03:42 Ejercicios Avro-Tools.txt~
+drwxrwxr-x 2 cloudera cloudera     4096 Sep  8 03:48 lib y config
+-rw-rw-r-- 1 cloudera cloudera     3358 Sep  8 03:53 Ejercicios Avro-Tools.txt
+-rw-rw-r-- 1 cloudera cloudera      480 Sep  8 03:57 twitter.avsc
+[cloudera@quickstart AVRO]$ cat twitter.avsc
+{
+  "type" : "record",
+  "name" : "twitter_schema",
+  "namespace" : "com.miguno.avro",
+  "fields" : [ {
+    "name" : "username",
+    "type" : "string",
+    "doc" : "Name of the user account on Twitter.com"
+  }, {
+    "name" : "tweet",
+    "type" : "string",
+    "doc" : "The content of the user's Twitter message"
+  }, {
+    "name" : "timestamp",
+    "type" : "long",
+    "doc" : "Unix epoch time in milliseconds"
+  } ],
+  "doc:" : "A basic schema for storing Twitter messages"
+}
+
+
+4. Convertimos un AVRO en un JSON
+
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar tojson --pretty twitter.avro > twitter.json
+[cloudera@quickstart AVRO]$ cat twitter.json
+{
+  "username" : "miguno",
+  "tweet" : "Rock: Nerf paper, scissors is fine.",
+  "timestamp" : 1366150681
+}
+{
+  "username" : "BlizzardCS",
+  "tweet" : "Works as intended.  Terran is IMBA.",
+  "timestamp" : 1366154481
+}
+  
+
+5. Convertimos el JSON a un nuevo AVRO con un schema definido
+
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar fromjson twitter.json --schema-file twitter.avsc > twitter_copia.avro
+[cloudera@quickstart AVRO]$ ls -ltr
+total 12272
+-rwxrw-rw- 1 cloudera cloudera      548 Sep  7 10:32 twitter.avro
+-rwxrw-rw- 1 cloudera cloudera 12527927 Sep  8 03:40 avro-tools-1.7.7.jar
+drwxrwxr-x 2 cloudera cloudera     4096 Sep  8 03:48 lib y config
+-rw-rw-r-- 1 cloudera cloudera      480 Sep  8 03:57 twitter.avsc
+-rw-rw-r-- 1 cloudera cloudera      218 Sep  8 03:59 twitter.json
+-rw-rw-r-- 1 cloudera cloudera     5549 Sep  8 04:01 Ejercicios Avro-Tools.txt
+-rw-rw-r-- 1 cloudera cloudera      548 Sep  8 04:05 twitter_copia.avro
+[cloudera@quickstart AVRO]$ cat twitter_copia.avro
+Objavro.codenullavro.schema�{"type":"record","name":"twitter_schema","namespace":"com.miguno.avro","fields":[{"name":"username","type":"string","doc":"Name of the user account on Twitter.com"},{"name":"tweet","type":"string","doc":"The content of the user's Twitter message"},{"name":"timestamp","type":"long","doc":"Unix epoch time in milliseconds"}],"doc:":"A basic schema for storing Twitter messages"}���|s16�?�1DO�
+                                                                                          migunoFRock: Nerf paper, scissors is fine.��
+BlizzardCSFWorks as intended.  Terran is IMBA.��
+���|s16�?�1DO[cloudera@quickstart AVRO]$ 
+
+
+
+
+6. Importamos con Sqoop una tabla como avro y luego la parseamos a json y a tipo text
+[cloudera@quickstart AVRO]$ sqoop list-tables --connect jdbc:mysql://localhost/oozie --username root --password cloudera
+Warning: /usr/lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+16/09/08 04:15:30 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.7.0
+16/09/08 04:15:30 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+16/09/08 04:15:31 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+BUNDLE_ACTIONS
+BUNDLE_JOBS
+COORD_ACTIONS
+COORD_JOBS
+OOZIE_SYS
+OPENJPA_SEQUENCE_TABLE
+SLA_EVENTS
+SLA_REGISTRATION
+SLA_SUMMARY
+VALIDATE_CONN
+WF_ACTIONS
+WF_JOBS
+[cloudera@quickstart AVRO]$ sqoop eval --connect jdbc:mysql://localhost/oozie --username root --password cloudera -e 'SELECT * FROM OOZIE_SYS'
+Warning: /usr/lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+16/09/08 04:16:16 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.7.0
+16/09/08 04:16:16 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+16/09/08 04:16:17 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+-----------------------------------------------
+| name                 | data                 | 
+-----------------------------------------------
+| db.version           | 3                    | 
+| oozie.version        | 4.1.0-cdh5.7.0       | 
+-----------------------------------------------
+
+
+
+[cloudera@quickstart AVRO]$ sqoop import --connect jdbc:mysql://localhost/oozie --username root --password cloudera -e 'SELECT * FROM OOZIE_SYS where $CONDITIONS' --target-dir /tmp/oozie_table --split-by name --as-avrodatafile -m 1
+Warning: /usr/lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+16/09/08 04:22:20 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.7.0
+16/09/08 04:22:20 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+16/09/08 04:22:21 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+16/09/08 04:22:21 INFO tool.CodeGenTool: Beginning code generation
+16/09/08 04:22:22 INFO manager.SqlManager: Executing SQL statement: SELECT * FROM OOZIE_SYS where  (1 = 0) 
+16/09/08 04:22:22 INFO manager.SqlManager: Executing SQL statement: SELECT * FROM OOZIE_SYS where  (1 = 0) 
+16/09/08 04:22:22 INFO manager.SqlManager: Executing SQL statement: SELECT * FROM OOZIE_SYS where  (1 = 0) 
+16/09/08 04:22:22 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/lib/hadoop-mapreduce
+Note: /tmp/sqoop-cloudera/compile/683fe1c10cbd7f53b146e5ace3764c7e/QueryResult.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+16/09/08 04:22:26 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-cloudera/compile/683fe1c10cbd7f53b146e5ace3764c7e/QueryResult.jar
+16/09/08 04:22:26 INFO mapreduce.ImportJobBase: Beginning query import.
+16/09/08 04:22:26 INFO Configuration.deprecation: mapred.job.tracker is deprecated. Instead, use mapreduce.jobtracker.address
+16/09/08 04:22:27 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+16/09/08 04:22:29 INFO manager.SqlManager: Executing SQL statement: SELECT * FROM OOZIE_SYS where  (1 = 0) 
+16/09/08 04:22:29 INFO manager.SqlManager: Executing SQL statement: SELECT * FROM OOZIE_SYS where  (1 = 0) 
+16/09/08 04:22:29 INFO manager.SqlManager: Executing SQL statement: SELECT * FROM OOZIE_SYS where  (1 = 0) 
+16/09/08 04:22:29 INFO mapreduce.DataDrivenImportJob: Writing Avro schema file: /tmp/sqoop-cloudera/compile/683fe1c10cbd7f53b146e5ace3764c7e/AutoGeneratedSchema.avsc
+16/09/08 04:22:29 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+16/09/08 04:22:29 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+16/09/08 04:22:33 INFO db.DBInputFormat: Using read commited transaction isolation
+16/09/08 04:22:33 INFO mapreduce.JobSubmitter: number of splits:1
+16/09/08 04:22:33 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1473156829873_0015
+16/09/08 04:22:34 INFO impl.YarnClientImpl: Submitted application application_1473156829873_0015
+16/09/08 04:22:34 INFO mapreduce.Job: The url to track the job: http://quickstart.cloudera:8088/proxy/application_1473156829873_0015/
+16/09/08 04:22:34 INFO mapreduce.Job: Running job: job_1473156829873_0015
+16/09/08 04:22:49 INFO mapreduce.Job: Job job_1473156829873_0015 running in uber mode : false
+16/09/08 04:22:49 INFO mapreduce.Job:  map 0% reduce 0%
+16/09/08 04:23:01 INFO mapreduce.Job:  map 100% reduce 0%
+16/09/08 04:23:01 INFO mapreduce.Job: Job job_1473156829873_0015 completed successfully
+16/09/08 04:23:01 INFO mapreduce.Job: Counters: 30
+	File System Counters
+		FILE: Number of bytes read=0
+		FILE: Number of bytes written=138769
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=87
+		HDFS: Number of bytes written=401
+		HDFS: Number of read operations=4
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=2
+	Job Counters 
+		Launched map tasks=1
+		Other local map tasks=1
+		Total time spent by all maps in occupied slots (ms)=9284
+		Total time spent by all reduces in occupied slots (ms)=0
+		Total time spent by all map tasks (ms)=9284
+		Total vcore-seconds taken by all map tasks=9284
+		Total megabyte-seconds taken by all map tasks=9506816
+	Map-Reduce Framework
+		Map input records=2
+		Map output records=2
+		Input split bytes=87
+		Spilled Records=0
+		Failed Shuffles=0
+		Merged Map outputs=0
+		GC time elapsed (ms)=103
+		CPU time spent (ms)=2910
+		Physical memory (bytes) snapshot=166006784
+		Virtual memory (bytes) snapshot=1574862848
+		Total committed heap usage (bytes)=198180864
+	File Input Format Counters 
+		Bytes Read=0
+	File Output Format Counters 
+		Bytes Written=401
+16/09/08 04:23:01 INFO mapreduce.ImportJobBase: Transferred 401 bytes in 31.852 seconds (12.5895 bytes/sec)
+16/09/08 04:23:01 INFO mapreduce.ImportJobBase: Retrieved 2 records.
+[cloudera@quickstart AVRO]$ hadoop fs -ls /tmp/oozie_table
+Found 2 items
+-rw-r--r--   1 cloudera supergroup          0 2016-09-08 04:22 /tmp/oozie_table/_SUCCESS
+-rw-r--r--   1 cloudera supergroup        401 2016-09-08 04:22 /tmp/oozie_table/part-m-00000.avro
+[cloudera@quickstart AVRO]$ hadoop fs -cat /tmp/oozie_table/part-m-00000.avro
+Objavro.schema�{"type":"record","name":"AutoGeneratedSchema","doc":"Sqoop import of QueryResult","fields":[{"name":"name","type":["null","string"],"default":null,"columnName":"name","sqlType":"12"},{"name":"data","type":["null","string"],"default":null,"columnName":"data","sqlType":"12"}],"tableName":"QueryResult"}��{h;CZDQ�'*�]�\db.version3oozie.version4.1.0-cdh5.7.0��{h;CZDQ�'*�]�[cloudera@quickstart AVRO]$ 
+
+
+[cloudera@quickstart AVRO]$ hadoop fs -get /tmp/oozie_table/part-m-00000.avro
+[cloudera@quickstart AVRO]$ ls -ltr
+total 12264
+-rwxrw-rw- 1 cloudera cloudera 12527927 Sep  8 03:40 avro-tools-1.7.7.jar
+drwxrwxr-x 2 cloudera cloudera     4096 Sep  8 04:10 lib y config
+-rw-rw-r-- 1 cloudera cloudera      412 Sep  8 04:19 AutoGeneratedSchema.avsc
+-rw-rw-r-- 1 cloudera cloudera    14887 Sep  8 04:25 Ejercicios Avro-Tools.txt
+-rw-r--r-- 1 cloudera cloudera      401 Sep  8 04:29 part-m-00000.avro
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar getschema part-m-00000.avro
+{
+  "type" : "record",
+  "name" : "AutoGeneratedSchema",
+  "doc" : "Sqoop import of QueryResult",
+  "fields" : [ {
+    "name" : "name",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "name",
+    "sqlType" : "12"
+  }, {
+    "name" : "data",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "data",
+    "sqlType" : "12"
+  } ],
+  "tableName" : "QueryResult"
+}
+[cloudera@quickstart AVRO]$ cat AutoGeneratedSchema.avsc
+{
+  "type" : "record",
+  "name" : "AutoGeneratedSchema",
+  "doc" : "Sqoop import of QueryResult",
+  "fields" : [ {
+    "name" : "name",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "name",
+    "sqlType" : "12"
+  }, {
+    "name" : "data",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "data",
+    "sqlType" : "12"
+  } ],
+  "tableName" : "QueryResult"
+}
+[cloudera@quickstart AVRO]$ java -jar avro-tools-1.7.7.jar tojson --pretty part-m-00000.avro > part-m-00000.json
+[cloudera@quickstart AVRO]$ cat part-m-00000.json
+{
+  "name" : {
+    "string" : "db.version"
+  },
+  "data" : {
+    "string" : "3"
+  }
+}
+{
+  "name" : {
+    "string" : "oozie.version"
+  },
+  "data" : {
+    "string" : "4.1.0-cdh5.7.0"
+  }
+}
+[cloudera@quickstart AVRO]$ 
+
+
+
+

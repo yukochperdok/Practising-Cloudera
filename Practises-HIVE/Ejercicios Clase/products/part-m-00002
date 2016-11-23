@@ -1,0 +1,278 @@
+1274198	XYZ	Mid Tower Computer Case	7879	7630	11
+1274199	SuperGamer	Mid Tower Computer Case	8029	7147	11
+1274200	BuckLogix	Mid Tower Computer Case	7949	6987	11
+1274201	BDT	Mid Tower Computer Case	8009	7001	11
+1274202	BuckLogix	Mid Tower Computer Case	7899	7210	11
+1274203	Orion	Mid Tower Computer Case	7959	7459	11
+1274204	Electrosaurus	Full Tower Computer Case	13089	12575	13
+1274205	Megachango	Full Tower Computer Case	12829	12498	13
+1274206	Electrosaurus	Full Tower Computer Case	13039	12053	13
+1274207	Ultramegaco	Full Tower Computer Case	12879	12236	13
+1274208	XYZ	Full Tower Computer Case	12849	12575	13
+1274209	BuckLogix	XTREME Motherboard	17789	16451	3
+1274210	Sparky	PERTURB Motherboard	16239	15969	3
+1274211	Sparky	DISGRUNT Motherboard	12939	12853	2
+1274212	SuperGamer	3.0GHz CPU	12899	12121	2
+1274213	Electrosaurus	3.0GHz CPU	13129	12480	2
+1274214	Sparky	3.2GHz CPU	16239	14279	2
+1274215	ACME	3.2GHz CPU	15739	14668	2
+1274216	Dualcore	3.2GHz CPU	16229	14723	2
+1274217	United Digistuff	3.4GHz CPU	17919	17545	2
+1274218	TPS	3.4GHz CPU	17769	16699	2
+1274219	Dualcore	3.4GHz CPU	18059	17869	2
+1274220	Electrosaurus	3.6GHz CPU	22049	21314	2
+1274221	ElCheapo	3.6GHz CPU	22199	19722	2
+1274222	Overtop	3.6GHz CPU	22289	21377	2
+1274223	ElCheapo	3.8GHz CPU	28319	27988	2
+1274224	Orion	3.8GHz CPU	28079	26746	2
+1274225	ACME	3.8GHz CPU	27829	27702	2
+1274226	XYZ	Power Supply (500W)	2529	2276	5
+1274227	Megachango	Power Supply (500W)	2529	2344	5
+1274228	TPS	Power Supply (500W)	2499	2242	5
+1274229	BDT	Power Supply (500W)	2509	2197	5
+1274230	Electrosaurus	Power Supply (600W)	2799	2599	5
+1274231	TPS	Power Supply (600W)	2779	2689	5
+1274232	Sparky	Power Supply (600W)	2819	2580	5
+1274233	XYZ	Power Supply (700W)	2969	2792	6
+1274234	United Digistuff	Power Supply (700W)	2969	2729	6
+1274235	BuckLogix	Power Supply (700W)	2989	2868	6
+1274236	Electrosaurus	Fireware 400 Card (PCI)	4969	4470	2
+1274237	BDT	Fireware 400 Card (PCI)	5019	4519	2
+1274238	Sparky	Fireware 800 Card (PCI)	7089	6699	2
+1274239	ACME	Fireware 800 Card (PCI)	6929	6097	2
+1274240	Ultramegaco	Fireware 800 Card (PCI)	7089	6283	2
+1274241	BDT	Fireware 800 Card (PCI)	6999	6315	2
+1274242	United Digistuff	SCSI Expansion Card (PCI)	7939	6983	2
+1274243	ElCheapo	SCSI Expansion Card (PCI)	7909	7565	2
+1274244	United Digistuff	SCSI Expansion Card (PCI)	7889	7643	2
+1274245	Electrosaurus	TV Tuner Card (PCI)	4949	4773	1
+1274246	Dualcore	TV Tuner Card (PCI)	4999	4767	1
+1274247	TPS	TV Tuner Card w/HDMI Output (PCI)	10149	9838	1
+1274248	ElCheapo	TV Tuner Card w/HDMI Output (PCI)	10159	9223	1
+1274249	XYZ	TV Tuner Card w/HDMI Output (PCI)	10089	9329	1
+1274250	United Digistuff	16MB VESA Graphics Card	1969	1835	1
+1274251	Electrosaurus	16MB VESA Graphics Card	1979	1856	1
+1274252	ACME	64MB PCI Graphics Card	2989	2922	1
+1274253	Orion	64MB PCI Graphics Card	2999	2638	1
+1274254	XYZ	64MB PCI Graphics Card	3019	2997	1
+1274255	Sparky	128MB AGP Graphics Card	5939	5560	1
+1274256	Electrosaurus	128MB AGP Graphics Card	5829	5135	1
+1274257	ElCheapo	128MB AGP Graphics Card	5819	5139	1
+1274258	Electrosaurus	512MB PCI-X Graphics Card (OEM)	7919	7910	2
+1274259	Ultramegaco	512MB PCI-X Graphics Card (OEM)	7959	7040	2
+1274260	BuckLogix	512MB PCI-X Graphics Card (OEM)	7819	7372	2
+1274261	Megachango	512MB PCI-X Graphics Card (OEM)	7929	7841	2
+1274262	ElCheapo	512MB PCI-X Graphics Card (OEM)	7979	7332	2
+1274263	BuckLogix	512MB PCI-X Graphics Card (OEM)	7919	7710	2
+1274264	Sparky	512MB PCI-X Graphics Card (OEM)	7869	7195	2
+1274265	Electrosaurus	1024MB PCI-X Graphics Card with HDMI output (OEM)	9919	9833	2
+1274266	Sparky	1024MB PCI-X Graphics Card with HDMI output (OEM)	9959	9641	2
+1274267	XYZ	1024MB PCI-X Graphics Card with HDMI output (OEM)	10009	9100	2
+1274268	Electrosaurus	1024MB PCI-X Graphics Card with HDMI output (OEM)	9939	9181	2
+1274269	Ultramegaco	1024MB PCI-X Graphics Card with HDMI output (OEM)	9939	8765	2
+1274270	TPS	1024MB PCI-X Graphics Card with HDMI output (OEM)	9829	9027	2
+1274271	Sparky	1024MB PCI-X Graphics Card with HDMI output (OEM)	9769	8956	2
+1274272	XYZ	2GB Super Gamer Graphics Card	18899	16697	3
+1274273	SuperGamer	2GB Super Gamer Graphics Card	18949	17467	3
+1274274	TPS	2x2GB DDR3 1600MHz Desktop RAM	20669	20279	2
+1274275	XYZ	2x2GB DDR3 1600MHz Desktop RAM	20789	19241	2
+1274276	ACME	2x2GB DDR3 1600MHz Desktop RAM	20969	18295	2
+1274277	XYZ	2x2GB DDR3 1600MHz Desktop RAM	21029	20680	2
+1274278	Ultramegaco	2x2GB DDR3 1600MHz Desktop RAM	21179	19318	2
+1274279	ACME	4x2GB DDR3 1333MHz Triple Channel Desktop RAM	37929	35857	2
+1274280	BDT	4x2GB DDR3 1333MHz Triple Channel Desktop RAM	38609	36627	2
+1274281	ElCheapo	2x1GB Value DDR2 - 667 RAM	13169	12977	2
+1274282	Ultramegaco	2x1GB Value DDR2 - 667 RAM	13079	12847	2
+1274283	BuckLogix	1GB DDR 400 Desktop RAM	8109	7602	1
+1274284	Sparky	1GB DDR 400 Desktop RAM	7939	7110	1
+1274285	TPS	1GB DDR 400 Desktop RAM	8099	7846	1
+1274286	TPS	1GB DDR2 667 Laptop RAM	9909	8700	1
+1274287	Overtop	1GB DDR2 667 Laptop RAM	10009	9191	1
+1274288	SuperGamer	1GB DDR2 667 Laptop RAM	10019	8943	1
+1274289	SuperGamer	1GB DDR2 800 Desktop RAM	13199	11686	1
+1274290	BDT	1GB DDR2 800 Desktop RAM	13169	11676	1
+1274291	BuckLogix	2GB DDR2 667 RAM	15029	14475	1
+1274292	Megachango	2GB DDR2 667 RAM	15239	14474	1
+1274293	Sparky	2GB DDR2 800MHz Laptop RAM	18989	17462	1
+1274294	Orion	Professional DDR3 Motherboard	18189	17830	5
+1274295	Megachango	Professional DDR3 Motherboard	17939	15648	5
+1274296	ACME	Professional DDR3 Motherboard	17759	16678	5
+1274297	XYZ	Desktop Motherboard	8029	7388	2
+1274298	Overtop	Desktop Motherboard	7929	7253	2
+1274299	TPS	Server Motherboard	26919	24837	6
+1274300	Orion	Server Motherboard	27319	25924	6
+1274301	BDT	Soundcard (Basic)	1299	1296	2
+1274302	United Digistuff	Soundcard (Basic)	1319	1218	2
+1274303	United Digistuff	Soundcard (Basic)	1289	1202	2
+1274304	ACME	Soundcard (Premium Multimedia)	8889	7735	2
+1274305	Electrosaurus	Soundcard (Premium Multimedia)	8979	7995	2
+1274306	United Digistuff	Server (2U rackmount, eight-core, 64GB, 12TB)	597049	533263	121
+1274307	Krustybitz	Server (2U rackmount, eight-core, 64GB, 12TB)	599319	542497	121
+1274308	Gigabux	Server (2U rackmount, eight-core, 64GB, 12TB)	614559	556183	121
+1274309	Yoyodyne	Server (1U rackmount, quad-core, 4GB, 2TB)	299969	279724	111
+1274310	Electrosaurus	Server (1U rackmount, quad-core, 4GB, 2TB)	295269	255067	111
+1274311	Yoyodyne	Server (1U rackmount, quad-core, 4GB, 2TB)	300969	292904	111
+1274312	Krustybitz	Server (1U rackmount, hex-core, 8GB, 4TB)	409949	392967	88
+1274313	Olde-Gray	Server (1U rackmount, hex-core, 8GB, 4TB)	393989	322686	88
+1274314	Lemmon	Server (1U rackmount, hex-core, 8GB, 4TB)	397159	363389	88
+1274315	Sparky	Server (1U rackmount, hex-core, 16GB, 8TB)	470019	378842	79
+1274316	Dualcore	Server (1U rackmount, hex-core, 16GB, 8TB)	448239	389307	79
+1274317	Krustybitz	Server (1U rackmount, hex-core, 16GB, 8TB)	459179	434635	79
+1274318	BuckLogix	Server (1U rackmount, hex-core, 32GB, 8TB)	483989	437453	82
+1274319	BuckLogix	Server (1U rackmount, hex-core, 32GB, 8TB)	478489	389929	82
+1274320	Sparky	Server (1U rackmount, hex-core, 32GB, 8TB)	478459	417093	82
+1274321	Byteweasel	Hadoop Cluster, Economy (4-node)	975149	952934	570
+1274322	Olde-Gray	Home Media Server	62469	59514	19
+1274323	Dualcore	Home Media Server	62139	61255	19
+1274324	Krustybitz	Basic Desktop	61989	61174	18
+1274325	Dualcore	Basic Desktop	63409	62230	18
+1274326	Olde-Gray	Basic Desktop	63639	53193	18
+1274327	Yoyodyne	Professional Series Desktop	91889	88609	22
+1274328	Dualcore	Professional Series Desktop	90989	89208	22
+1274329	Homertech	Professional Series Desktop	88319	71033	22
+1274330	Olde-Gray	Premium Gamer Desktop	129219	127994	28
+1274331	Dualcore	Premium Gamer Desktop	131539	113953	28
+1274332	Sparky	All-in-one Desktop (21 in. display)	173989	144618	34
+1274333	Electrosaurus	All-in-one Desktop (21 in. display)	173069	160162	34
+1274334	Bitmonkey	All-in-one Desktop (24 in. display)	194389	191913	39
+1274335	Bitmonkey	All-in-one Desktop (24 in. display)	188579	157743	39
+1274336	Bitmonkey	Basic Desktop	43459	39281	14
+1274337	Yoyodyne	Basic Desktop	44119	35772	14
+1274338	Orion	Basic Desktop	43929	37232	14
+1274339	Krustybitz	Professional Series Notebook	71159	66223	11
+1274340	SuperGamer	Professional Series Notebook	70069	69664	11
+1274341	Orion	Professional Series Notebook	68829	62360	11
+1274342	Lemmon	Premium Gamer Notebook	91819	86729	13
+1274343	SuperGamer	Premium Gamer Notebook	87729	74141	13
+1274344	Byteweasel	Ultra-portable Notebook	79099	75743	7
+1274345	Orion	Ultra-portable Notebook	81959	79543	7
+1274346	Olde-Gray	Economy Netbook	30639	29855	6
+1274347	Homertech	Economy Netbook	29249	28309	6
+1274348	Byteweasel	Tablet PC (10 in. display, 64 GB)	37999	38103	4
+1274349	United Digistuff	Tablet PC (10 in. display, 64 GB)	49579	39743	4
+1274350	Orion	Tablet PC (10 in. display, 64 GB)	49069	40923	4
+1274351	Orion	Tablet PC (10 in. display, 32 GB)	43869	42781	4
+1274352	Orion	Tablet PC (10 in. display, 32 GB)	41969	38475	4
+1274353	Orion	Tablet PC (10 in. display, 32 GB)	42869	40620	4
+1274354	Byteweasel	Tablet PC (10 in. display, 16 GB)	38949	38672	4
+1274355	Orion	Tablet PC (10 in. display, 16 GB)	37449	35527	4
+1274356	Orion	Tablet PC (10 in. display, 16 GB, WiFi-only)	35889	29524	4
+1274357	Homertech	Tablet PC (7 in. display, 32 GB)	40989	39316	3
+1274358	Orion	Tablet PC (7 in. display, 32 GB)	42939	38437	3
+1274359	United Digistuff	Tablet PC (7 in. display, 16 GB, WiFi-only)	32589	30510	3
+1274360	Olde-Gray	Tablet PC (7 in. display, 16 GB, WiFi-only)	32589	27615	3
+1274361	Homertech	Tablet PC (7 in. display, 16 GB)	35219	30957	3
+1274362	Electrosaurus	Tablet PC (7 in. display, 16 GB)	35019	30769	3
+1274363	BuckLogix	Tablet PC (7 in. display, 8 GB)	31439	26138	3
+1274364	Sparky	Tablet PC (7 in. display, 8 GB, WiFI-only)	30359	27213	3
+1274365	Sprite	19" Wide Screen LCD Monitor	13389	10492	21
+1274366	Ultramegaco	19" Wide Screen LCD Monitor	13359	12511	21
+1274367	Olde-Gray	20" Wide Screen LCD Monitor	14909	10635	22
+1274368	Lemmon	20" Wide Screen LCD Monitor	15119	14510	22
+1274369	ElCheapo	20" Wide Screen LCD Monitor	15559	12160	22
+1274370	Wernham	22" Wide Screen LCD Monitor	17829	14284	24
+1274371	ACME	22" Wide Screen LCD Monitor	17989	17552	24
+1274372	Sprite	22" Wide Screen LCD Monitor	18039	13234	24
+1274373	Argo	22" Wide Screen LCD Monitor	17719	17482	24
+1274374	Argo	22" Wide Screen LCD Monitor	17769	17666	24
+1274375	ElCheapo	24" Wide Screen LCD Monitor	23639	17968	25
+1274376	Ultramegaco	24" Wide Screen LCD Monitor	22909	19777	25
+1274377	Wernham	24" Wide Screen LCD Monitor	22169	20576	25
+1274378	Olde-Gray	24" Wide Screen LCD Monitor	22579	21198	25
+1274379	ElCheapo	24" Wide Screen LCD Monitor	23539	19184	25
+1274380	Dualcore	24" Wide Screen LCD Monitor	22719	17318	25
+1274381	Wernham	24" Wide Screen LCD Monitor	23809	18760	25
+1274382	Wernham	27" Wide Screen LCD Monitor	36139	29468	29
+1274383	Lemmon	27" Wide Screen LCD Monitor	36159	31177	29
+1274384	ElCheapo	27" Wide Screen LCD Monitor	37739	31379	29
+1274385	Wernham	27" Wide Screen LCD Monitor	36119	31583	29
+1274386	Wernham	30" Wide Screen LCD Monitor	49419	43872	35
+1274387	Olde-Gray	30" Wide Screen LCD Monitor	50349	39288	35
+1274388	ElCheapo	30" Wide Screen LCD Monitor	49949	37119	35
+1274389	ACME	24" Ultra-Premium LCD Monitor	46939	39453	27
+1274390	Olde-Gray	24" Ultra-Premium LCD Monitor	46479	33479	27
+1274391	Ultramegaco	21" LED Backlit Monitor	24859	19146	23
+1274392	Sprite	24" LED Backlit Monitor	29619	22503	25
+1274393	Olde-Gray	24" LED Backlit Monitor	29579	21554	25
+1274394	Olde-Gray	40" Large-Format LCD Display	86159	80220	51
+1274395	Olde-Gray	40" Large-Format LCD Display	85219	68994	51
+1274396	Olde-Gray	40" Large-Format LCD Display	85979	74526	51
+1274397	Gigabux	24" Wide Screen TV	23899	14509	31
+1274398	Electrosaurus	24" Wide Screen TV	24139	20806	31
+1274399	Chestnut	27" Wide Screen TV	27589	17211	33
+1274400	Sprite	27" Wide Screen TV	25799	24587	33
+1274401	Artie	27" Wide Screen TV	27829	16054	33
+1274402	Wernham	32" Wide Screen TV	36059	31347	36
+1274403	Lemmon	32" Wide Screen TV	36069	34101	36
+1274404	Lemmon	32" Wide Screen TV	36909	29945	36
+1274405	Argo	32" Wide Screen TV	37739	35492	36
+1274406	Artie	32" Wide Screen TV	38019	22535	36
+1274407	Lemmon	36" Wide Screen TV	43129	38375	41
+1274408	Sprite	36" Wide Screen TV	45309	38017	41
+1274409	Tyrell	36" Wide Screen TV	47669	35793	41
+1274410	Weisenheimer	36" Wide Screen TV	42289	41202	41
+1274411	McDowell	36" Wide Screen TV	42859	32469	41
+1274412	ARCAM	42" Wide Screen TV	55559	48583	46
+1274413	Electrosaurus	42" Wide Screen TV	58279	39539	46
+1274414	Chestnut	42" Wide Screen TV	59789	42719	46
+1274415	McDowell	42" Wide Screen TV	58029	55306	46
+1274416	Lemmon	42" Wide Screen TV	55169	52343	46
+1274417	McDowell	42" Wide Screen TV	56919	45340	46
+1274418	McDowell	42" Wide Screen TV	55649	40255	46
+1274419	McDowell	48" Wide Screen TV	64909	41632	51
+1274420	Wolfpack	48" Wide Screen TV	72369	62586	51
+1274421	Electrosaurus	48" Wide Screen TV	68489	49386	51
+1274422	Wolfpack	48" Wide Screen TV	72699	42075	51
+1274423	Tyrell	48" Wide Screen TV	66759	51478	51
+1274424	Chestnut	48" Wide Screen TV	70939	64467	51
+1274425	Wernham	48" Wide Screen TV	66309	53563	51
+1274426	Gigabux	61" Wide Screen TV	122919	104101	76
+1274427	Whiteacre	61" Wide Screen TV	130799	118902	76
+1274428	Lemmon	61" Wide Screen TV	131149	122584	76
+1274429	Wernham	61" Wide Screen TV	128579	89674	76
+1274430	Tyrell	DVD Player	5909	3702	6
+1274431	Whiteacre	DVD Player	5899	4951	6
+1274432	Whiteacre	DVD Player	6369	5887	6
+1274433	Wernham	Blu-Ray Player	13299	7753	5
+1274434	Artie	Blu-Ray Player	13269	9564	5
+1274435	Chestnut	Blu-Ray Player	12529	9310	5
+1274436	Wernham	Video Cassette Recorder	12959	12314	14
+1274437	Lemmon	Video Cassette Recorder	13669	10906	14
+1274438	Sprite	Video Cassette Recorder (Betamax format)	12549	8170	13
+1274439	Whiteacre	Video Cassette Recorder (Betamax format)	12729	7156	13
+1274440	Wolfpack	LaserDisc Player	10639	6986	11
+1274441	Wolfpack	LaserDisc Player	10919	7979	11
+1274442	Sprite	Gaming Console	35649	21511	9
+1274443	McDowell	Gaming Console	36599	31904	9
+1274444	Weisenheimer	Gaming Console	35559	19702	9
+1274445	Sprite	Gaming Console (WiFi)	39699	28387	10
+1274446	ARCAM	Gaming Console (WiFi)	40599	36249	10
+1274447	Tyrell	Digital Video Recorder (500 GB)	30079	17319	10
+1274448	Lemmon	Digital Video Recorder (500 GB)	29089	25408	10
+1274449	Argo	Digital Video Recorder (750 GB)	32439	24949	11
+1274450	Wolfpack	Digital Video Recorder (750 GB)	35229	21442	11
+1274451	Lemmon	Digital Video Recorder (750 GB)	34449	30350	11
+1274452	Gigabux	Digital Video Recorder (1.0 TB)	38389	37073	11
+1274453	Wolfpack	Digital Video Recorder (1.0 TB)	39309	38699	11
+1274454	McDowell	Digital Video Recorder (1.0 TB)	39719	26697	11
+1274455	McDowell	Digital Video Recorder (1.0 TB)	38489	37402	11
+1274456	Whiteacre	Digital Video Recorder (1.5 TB)	48139	35702	11
+1274457	McDowell	Digital Video Recorder (1.5 TB)	47449	42185	11
+1274458	McDowell	Digital Video Recorder (1.5 TB)	47309	37034	11
+1274459	Chestnut	Digital Video Recorder (2.0 TB)	60519	35874	12
+1274460	Electrosaurus	3D Digital TV Glasses	7599	7062	2
+1274461	Wernham	3D Digital TV Glasses	8369	8141	2
+1274462	Whiteacre	3D Digital TV Glasses	8469	6547	2
+1274463	Bigdeal	Dual Band Wireless Range Extender	12559	11208	3
+1274464	Bigdeal	Dual Band Wireless Range Extender	13219	10808	3
+1274465	TPS	ADSL Modem + Wireless N Router	8989	7179	2
+1274466	Dualcore	ADSL Modem + Wireless N Router	9139	8195	2
+1274467	Duff	ADSL Modem + Wireless N Router	8969	8639	2
+1274468	TPS	ADSL2 Modem + Wireless G Router	10179	8628	2
+1274469	Texi	ADSL2 Modem + Wireless G Router	10059	9373	2
+1274470	TPS	Basic Wireless Modem Router	6869	6028	2
+1274471	Homertech	Basic Wireless Modem Router	7109	6413	2
+1274472	Wolfpack	Wireless N Modem Router	10309	9062	2
+1274473	Dualcore	Wireless N Modem Router	9869	8785	2
+1274474	Wolfpack	Wireless N Modem Router	9839	9267	2
+1274475	Dualcore	Wireless G Router	8249	7910	2

@@ -1,0 +1,50 @@
+[cloudera@quickstart ~]$ hadoop fs -put /home/cloudera/Desktop/Curso/Ejercicios_Fernando/HIVE/orders /tmp 
+[cloudera@quickstart ~]$ hadoop fs -put /home/cloudera/Desktop/Curso/Ejercicios_Fernando/HIVE/order_details /tmp 
+[cloudera@quickstart ~]$ hadoop fs -put /home/cloudera/Desktop/Curso/Ejercicios_Fernando/HIVE/customers /tmp
+
+[cloudera@quickstart ~]$ hadoop fs -ls /tmp
+Found 12 items
+-rw-r--r--   1 cloudera supergroup   16779034 2016-05-07 03:29 /tmp/access_log_MBIT
+drwxr-xr-x   - cloudera supergroup          0 2016-05-20 11:21 /tmp/customers
+drwxrwxrwt   - mapred   mapred              0 2016-04-06 01:25 /tmp/hadoop-yarn
+drwx-wx-wx   - hive     supergroup          0 2016-05-07 03:14 /tmp/hive
+drwxrwxrwt   - mapred   hadoop              0 2016-04-06 01:27 /tmp/logs
+drwxr-xr-x   - cloudera supergroup          0 2016-05-20 11:21 /tmp/order_details
+drwxr-xr-x   - cloudera supergroup          0 2016-05-20 11:21 /tmp/orders
+drwxr-xr-x   - cloudera supergroup          0 2016-05-20 11:20 /tmp/products
+drwxr-xr-x   - cloudera supergroup          0 2016-05-07 07:43 /tmp/resultados
+drwxrwxrwt   - root     supergroup          0 2016-05-14 03:24 /tmp/salidaFlume
+drwxr-xr-x   - cloudera supergroup          0 2016-05-07 03:22 /tmp/shakespeare
+drwxr-xr-x   - cloudera supergroup          0 2016-05-20 08:46 /tmp/sqoop
+
+
+
+
+1. Crear Base datos:
+create database mbitdatabase;
+
+2. Crear tablas
+create table customers (cust_id int, fname string, lname string, street string, city string, state string, zipcode string) row format delimited fields terminated by '\t';
+load data inpath '/tmp/customers' into table customers;
+drop table customers;
+
+create table order_details (order_id int, prod_id int) row format delimited fields terminated by '\t' location '/tmp/order_details';
+
+create external table orders (order_id int, cust_id int, order_date timestamp) row format delimited fields terminated by '\t' location '/tmp/orders';
+drop table orders;
+
+create external table products (product_id int, brand string, name string, price int, cost int, shipping_wt int) row format delimited fields terminated by '\t' location '/tmp/products';
+drop table products;
+
+3. Tratamiento
+insert overwrite directory '/tmp/resultados-hive/customers/counter' select count(cust_id) from customers;
+insert overwrite directory '/tmp/resultados-hive/customers/top_state' select state, sum(cust_id) as num_clientes from customers group by state order by num_clientes desc limit 10;
+insert overwrite directory '/tmp/resultados-hive/products/top_ventas' select product_id, brand, name, shipping_wt from products order by shipping_wt desc limit 3;
+insert overwrite directory '/tmp/resultados-hive/products/top_ventas_marzo' select SUM(p.price * p.shipping_wt) from products p  JOIN order_details od ON (od.prod_id = p.product_id) JOIN orders o ON (o.order_id = od.order_id) where YEAR(o.order_date)=2011 AND MONTH(o.order_date)=3;
+insert overwrite directory '/tmp/resultados-hive/products/beneficio_marzo' select SUM(p.price * p.shipping_wt)-SUM(p.cost * p.shipping_wt) from products p  JOIN order_details od ON (od.prod_id = p.product_id) JOIN orders o ON (o.order_id = od.order_id) where YEAR(o.order_date)=2011 AND MONTH(o.order_date)=3;
+
+
+
+
+
+

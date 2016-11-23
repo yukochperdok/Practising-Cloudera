@@ -1,0 +1,3767 @@
+
+--------------------------------------EJERCICIOS BASICOS CON departments CREADA CON SQOOP--------------------------------------------------:
+La idea es con la tabla de departments que hemos pasado a HDFS con SQOOP, generar una tabla HIVE dep.
+
+1. Revisamos el fichero en HDFS y la tabla en MySql que fue el origen de Sqoop, para ver como serian los campos.
+
+[cloudera@quickstart ~]$ hdfs dfs -ls /user/cloudera/departments
+Found 2 items
+-rw-r--r--   1 cloudera cloudera          0 2016-07-28 03:43 /user/cloudera/departments/_SUCCESS
+-rw-r--r--   1 cloudera cloudera         60 2016-07-28 03:43 /user/cloudera/departments/part-m-00000
+[cloudera@quickstart ~]$ hdfs dfs -cat /user/cloudera/departments/part-m-00000
+2,Fitness
+3,Footwear
+4,Apparel
+5,Golf
+6,Outdoors
+7,Fan Shop
+[cloudera@quickstart ~]$ mysql -u root -pcloudera
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 215
+Server version: 5.1.73 Source distribution
+
+Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use retail_db
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++---------------------+
+| Tables_in_retail_db |
++---------------------+
+| categories          |
+| customers           |
+| departments         |
+| order_items         |
+| orders              |
+| products            |
++---------------------+
+6 rows in set (0.00 sec)
+
+mysql> describe departments;
++-----------------+-------------+------+-----+---------+----------------+
+| Field           | Type        | Null | Key | Default | Extra          |
++-----------------+-------------+------+-----+---------+----------------+
+| department_id   | int(11)     | NO   | PRI | NULL    | auto_increment |
+| department_name | varchar(45) | NO   |     | NULL    |                |
++-----------------+-------------+------+-----+---------+----------------+
+2 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+2. Accedemos a la shell de hive y generamos la "tabla hive"
+[cloudera@quickstart ~]$ hive
+2016-09-05 10:34:38,438 WARN  [main] mapreduce.TableMapReduceUtil: The hbase-prefix-tree module jar containing PrefixTreeCodec is not present.  Continuing without it.
+
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+hive> create table dep (id int, nombre string) row format delimited fields terminated by ',';
+OK
+Time taken: 3.853 seconds
+
+
+
+
+De momento no tenemos nada en la ruta del HDFS:
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/dep
+[cloudera@quickstart ~]$ 
+
+
+3. Cargamos los datos:
+
+hive> load data inpath '/user/cloudera/departments' into table dep;
+Loading data to table default.dep
+chgrp: changing ownership of 'hdfs://quickstart.cloudera:8020/user/hive/warehouse/dep/part-m-00000': User does not belong to supergroup
+Table default.dep stats: [numFiles=1, totalSize=60]
+OK
+Time taken: 1.075 seconds
+
+
+Ahora si tenemos el fichero en la ruta por defecto de hive:
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/dep
+Found 1 items
+-rwxrwxrwx   1 cloudera cloudera         60 2016-07-28 03:43 /user/hive/warehouse/dep/part-m-00000
+[cloudera@quickstart ~]$ hadoop fs -cat /user/hive/warehouse/dep/part-m-00000
+2,Fitness
+3,Footwear
+4,Apparel
+5,Golf
+6,Outdoors
+7,Fan Shop
+[cloudera@quickstart ~]$ 
+
+IMP: Si hubieramos tenido 50 fichero se habrian llevado los 50 fichero, la diferencia con el fichero de SQOOP es que este tendra sus metadatos asociados y podemos consultarlo.
+
+
+4. Hacemos nuestras consultas:
+hive> select * from dep;
+OK
+2	Fitness
+3	Footwear
+4	Apparel
+5	Golf
+6	Outdoors
+7	Fan Shop
+Time taken: 0.476 seconds, Fetched: 6 row(s)
+hive> select * from dep where id > 4;
+OK
+5	Golf
+6	Outdoors
+7	Fan Shop
+Time taken: 0.182 seconds, Fetched: 3 row(s)
+hive> select * from dep where nombre LIKE 'Fan Shop';
+OK
+7	Fan Shop
+Time taken: 0.1 seconds, Fetched: 1 row(s)
+
+
+
+
+----------------------------------------------------------OTROS EJERCICIOS--------------------------------------------------------------:
+
+a) AYUDA: Acceder a ayuda
+
+[cloudera@quickstart ~]$ hive -H
+2016-09-11 11:51:15,078 WARN  [main] mapreduce.TableMapReduceUtil: The hbase-prefix-tree module jar containing PrefixTreeCodec is not present.  Continuing without it.
+usage: hive
+ -d,--define <key=value>          Variable subsitution to apply to hive
+                                  commands. e.g. -d A=B or --define A=B
+    --database <databasename>     Specify the database to use
+ -e <quoted-query-string>         SQL from command line
+ -f <filename>                    SQL from files
+ -H,--help                        Print help information
+    --hiveconf <property=value>   Use value for given property
+    --hivevar <key=value>         Variable subsitution to apply to hive
+                                  commands. e.g. --hivevar A=B
+ -i <filename>                    Initialization SQL file
+ -S,--silent                      Silent mode in interactive shell
+ -v,--verbose                     Verbose mode (echo executed SQL to the
+                                  console)
+
+
+b) SHOW DB Y TBLS: Ver databases y tables existentes
+
+hive> show databases;
+OK
+default
+mbitdatabase
+Time taken: 1.615 seconds, Fetched: 2 row(s)
+hive> show tables;
+OK
+customers
+departamentos
+order_details
+orders
+Time taken: 0.13 seconds, Fetched: 4 row(s)
+
+
+Solo se ven las tablas asociadas al database default, hasta que no haces un use de otro database no ves las tablas asociadas a ese database:
+
+hive> use mbitdatabase;
+OK
+Time taken: 0.014 seconds
+hive> show tables;
+OK
+customers
+Time taken: 0.017 seconds, Fetched: 1 row(s)
+
+
+c) CREAR DB Y TABLA ASOCIADA A EL:
+
+hive> create database if not exists db_pruebas;
+OK
+Time taken: 0.363 seconds
+
+hive> show databases;
+OK
+default
+mbitdatabase
+db_pruebas
+Time taken: 0.035 seconds, Fetched: 3 row(s)
+
+Y en hdfs:
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/
+Found 4 items
+drwxrwxrwx   - cloudera supergroup          0 2016-05-20 11:43 /user/hive/warehouse/customers
+drwxrwxrwx   - cloudera supergroup          0 2016-09-11 13:10 /user/hive/warehouse/db_pruebas.db
+drwxrwxrwx   - cloudera supergroup          0 2016-05-14 03:43 /user/hive/warehouse/departamentos
+drwxrwxrwx   - cloudera supergroup          0 2016-05-20 11:36 /user/hive/warehouse/mbitdatabase.db
+
+Para crear una tabla asociada a un database que no es default, o se lo indicamos en el create o bien hacemos previamente un use del database:
+
+hive> create table db_pruebas.prueba1 (id INT, nombre STRING) row format delimited fields terminated by ',';
+OK
+Time taken: 1.7 seconds
+
+hive> show tables;
+OK
+customers
+departamentos
+order_details
+orders
+Time taken: 0.276 seconds, Fetched: 4 row(s)
+
+hive> use db_pruebas;
+OK
+Time taken: 0.044 seconds
+
+hive> create table prueba2 (id INT, nombre STRING) row format delimited fields terminated by ',';
+OK
+Time taken: 0.218 seconds
+
+hive> show tables;
+OK
+prueba1
+prueba2
+
+d) BORRAR DB Y TODAS TABLAS ASOCIADAS A EL (Hay que utilizar la clausula CASCADE):
+hive> drop database db_pruebas cascade;
+OK
+Time taken: 0.658 seconds
+
+
+Obviamente se elimina tambien los ficheros y carpetas en el directorio hdfs
+Lo volvemos a crear para los siguientes ejercicios:
+
+hive> create database if not exists db_pruebas;
+OK
+Time taken: 0.047 seconds
+hive> use db_pruebas;
+OK
+Time taken: 0.016 seconds
+hive> show tables;
+OK
+
+e) CREAR TABLA COMO CONSULTA DE OTRA CON 'AS SELECT':
+Consultamos la tabla origen:
+
+hive> Select * from default.orders where cust_id > 100000 limit 20;
+OK
+5000001	1133938	2008-06-01 00:03:35
+5000002	1131278	2008-06-01 00:27:42
+5000003	1153459	2008-06-01 00:49:37
+5000004	1159099	2008-06-01 01:05:28
+5000005	1020687	2008-06-01 01:08:36
+5000006	1187459	2008-06-01 01:11:09
+5000007	1048773	2008-06-01 01:36:35
+5000008	1064002	2008-06-01 01:36:52
+5000009	1096744	2008-06-01 01:49:46
+5000010	1107526	2008-06-01 03:07:14
+5000011	1040383	2008-06-01 03:20:59
+5000012	1176193	2008-06-01 04:26:43
+5000013	1177635	2008-06-01 04:55:30
+5000014	1072281	2008-06-01 05:33:52
+5000015	1065599	2008-06-01 05:50:54
+5000016	1023273	2008-06-01 06:47:02
+5000017	1166770	2008-06-01 07:07:25
+5000018	1068720	2008-06-01 07:11:47
+5000019	1151186	2008-06-01 07:14:53
+5000020	1196823	2008-06-01 07:21:52
+Time taken: 0.058 seconds, Fetched: 20 row(s)
+
+
+
+Creamos la tabla nueva y vemos que lanza un MR porque carga la tabla:
+
+hive> create table prueba_orders AS Select * from default.orders where cust_id > 10000 limit 100;
+Query ID = cloudera_20160911123030_e5dc19e7-b9e7-40de-b0a4-ccc3c3c1d5e1
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0033, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0033/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0033
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-11 13:06:09,030 Stage-1 map = 0%,  reduce = 0%
+2016-09-11 13:06:14,230 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.57 sec
+2016-09-11 13:06:20,455 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.24 sec
+MapReduce Total cumulative CPU time: 3 seconds 240 msec
+Ended Job = job_1473156829873_0033
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/prueba_orders
+Table db_pruebas.prueba_orders stats: [numFiles=1, numRows=100, totalSize=3600, rawDataSize=3500]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.24 sec   HDFS Read: 10988 HDFS Write: 3683 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 240 msec
+OK
+Time taken: 18.483 seconds
+hive> select * from prueba_orders;
+OK
+5000100	1181081	2008-06-02 01:45:26
+5000099	1007621	2008-06-02 01:33:39
+5000098	1162453	2008-06-02 01:18:34
+5000097	1081686	2008-06-02 01:13:45
+5000096	1036233	2008-06-02 01:05:41
+5000095	1087468	2008-06-02 00:42:35
+5000094	1184531	2008-06-02 00:34:03
+5000093	1139100	2008-06-02 00:09:34
+5000092	1128462	2008-06-02 00:02:58
+5000091	1107361	2008-06-01 23:41:12
+5000090	1189297	2008-06-01 23:29:40
+5000089	1102704	2008-06-01 23:14:17
+5000088	1126210	2008-06-01 22:56:31
+5000087	1077327	2008-06-01 22:39:42
+5000086	1047801	2008-06-01 22:07:46
+5000085	1060737	2008-06-01 21:49:55
+5000084	1075733	2008-06-01 21:37:24
+5000083	1189839	2008-06-01 21:36:29
+5000082	1195580	2008-06-01 21:36:25
+5000081	1135318	2008-06-01 21:35:06
+5000080	1085588	2008-06-01 21:25:50
+5000079	1017961	2008-06-01 20:50:32
+5000078	1060746	2008-06-01 20:48:23
+5000077	1052650	2008-06-01 20:47:22
+5000076	1038534	2008-06-01 20:46:49
+5000075	1129774	2008-06-01 20:43:50
+5000074	1103199	2008-06-01 20:41:08
+5000073	1087004	2008-06-01 20:33:19
+5000072	1063471	2008-06-01 20:27:58
+5000071	1024753	2008-06-01 20:12:54
+5000070	1178891	2008-06-01 20:11:16
+5000069	1088073	2008-06-01 20:07:38
+5000068	1157698	2008-06-01 20:05:42
+5000067	1061599	2008-06-01 20:04:11
+5000066	1180501	2008-06-01 19:58:28
+5000065	1198330	2008-06-01 19:56:58
+5000064	1084663	2008-06-01 19:56:52
+5000063	1190679	2008-06-01 19:27:48
+5000062	1118545	2008-06-01 19:27:36
+5000061	1096192	2008-06-01 19:19:24
+5000060	1190979	2008-06-01 18:50:26
+5000059	1060173	2008-06-01 18:44:53
+5000058	1032769	2008-06-01 18:19:09
+5000057	1121662	2008-06-01 18:15:30
+5000056	1139494	2008-06-01 18:11:56
+5000055	1040476	2008-06-01 18:08:13
+5000054	1005477	2008-06-01 17:57:32
+5000053	1030307	2008-06-01 17:45:13
+5000052	1138384	2008-06-01 17:30:28
+5000051	1068985	2008-06-01 17:14:29
+5000050	1171437	2008-06-01 16:44:53
+5000049	1197413	2008-06-01 16:42:22
+5000048	1064279	2008-06-01 16:40:55
+5000047	1176650	2008-06-01 16:28:07
+5000046	1186063	2008-06-01 16:08:39
+5000045	1019676	2008-06-01 16:01:17
+5000044	1087614	2008-06-01 15:51:21
+Time taken: 0.055 seconds, Fetched: 100 row(s)
+
+
+No solo estamos copiando la definicion sino que estamos cargando la tabla.
+Si no le indicamos un separador te toma un separador raro(creo que Crtl+A)
+[cloudera@quickstart ~]$ hadoop fs -cat /user/hive/warehouse/db_pruebas.db/prueba_orders/*
+500010011810812008-06-02 01:45:26
+500009910076212008-06-02 01:33:39
+500009811624532008-06-02 01:18:34
+500009710816862008-06-02 01:13:45
+500009610362332008-06-02 01:05:41
+500009510874682008-06-02 00:42:35
+500009411845312008-06-02 00:34:03
+500009311391002008-06-02 00:09:34
+500009211284622008-06-02 00:02:58
+500009111073612008-06-01 23:41:12
+500009011892972008-06-01 23:29:40
+500008911027042008-06-01 23:14:17
+500008811262102008-06-01 22:56:31
+500008710773272008-06-01 22:39:42
+500008610478012008-06-01 22:07:46
+500008510607372008-06-01 21:49:55
+500008410757332008-06-01 21:37:24
+500008311898392008-06-01 21:36:29
+500008211955802008-06-01 21:36:25
+500008111353182008-06-01 21:35:06
+500008010855882008-06-01 21:25:50
+500007910179612008-06-01 20:50:32
+500007810607462008-06-01 20:48:23
+500007710526502008-06-01 20:47:22
+500007610385342008-06-01 20:46:49
+500007511297742008-06-01 20:43:50
+500007411031992008-06-01 20:41:08
+500007310870042008-06-01 20:33:19
+500007210634712008-06-01 20:27:58
+500007110247532008-06-01 20:12:54
+500007011788912008-06-01 20:11:16
+500006910880732008-06-01 20:07:38
+500006811576982008-06-01 20:05:42
+500006710615992008-06-01 20:04:11
+500006611805012008-06-01 19:58:28
+500006511983302008-06-01 19:56:58
+500006410846632008-06-01 19:56:52
+500006311906792008-06-01 19:27:48
+500006211185452008-06-01 19:27:36
+500006110961922008-06-01 19:19:24
+500006011909792008-06-01 18:50:26
+500005910601732008-06-01 18:44:53
+500005810327692008-06-01 18:19:09
+500005711216622008-06-01 18:15:30
+500005611394942008-06-01 18:11:56
+500005510404762008-06-01 18:08:13
+500005410054772008-06-01 17:57:32
+500005310303072008-06-01 17:45:13
+500005211383842008-06-01 17:30:28
+500005110689852008-06-01 17:14:29
+500005011714372008-06-01 16:44:53
+500004911974132008-06-01 16:42:22
+500004810642792008-06-01 16:40:55
+500004711766502008-06-01 16:28:07
+500004611860632008-06-01 16:08:39
+500004510196762008-06-01 16:01:17
+500004410876142008-06-01 15:51:21
+500004311766772008-06-01 15:27:40
+500004211884542008-06-01 15:19:09
+500004111272772008-06-01 15:08:03
+500004010320082008-06-01 14:57:55
+500003910427652008-06-01 14:33:19
+500003811918862008-06-01 14:30:53
+500003710803982008-06-01 14:04:32
+500003611101552008-06-01 13:48:48
+500003511489712008-06-01 13:37:03
+500003411526382008-06-01 13:27:31
+500003311318362008-06-01 13:16:12
+500003211870372008-06-01 12:55:18
+500003110197852008-06-01 12:33:56
+500003010443202008-06-01 12:21:09
+500002910712302008-06-01 12:13:10
+500002810935092008-06-01 11:52:34
+500002710296862008-06-01 11:27:32
+500002611786852008-06-01 11:19:58
+500002511408942008-06-01 10:57:34
+500002410093132008-06-01 10:50:52
+500002311139022008-06-01 09:33:23
+500002211412452008-06-01 09:21:50
+500002110501162008-06-01 08:42:10
+500002011968232008-06-01 07:21:52
+500001911511862008-06-01 07:14:53
+500001810687202008-06-01 07:11:47
+500001711667702008-06-01 07:07:25
+500001610232732008-06-01 06:47:02
+500001510655992008-06-01 05:50:54
+500001410722812008-06-01 05:33:52
+500001311776352008-06-01 04:55:30
+500001211761932008-06-01 04:26:43
+500001110403832008-06-01 03:20:59
+500001011075262008-06-01 03:07:14
+500000910967442008-06-01 01:49:46
+500000810640022008-06-01 01:36:52
+500000710487732008-06-01 01:36:35
+500000611874592008-06-01 01:11:09
+500000510206872008-06-01 01:08:36
+500000411590992008-06-01 01:05:28
+500000311534592008-06-01 00:49:37
+500000211312782008-06-01 00:27:42
+500000111339382008-06-01 00:03:35
+
+
+asique lo suyo es indicarle antes del AS un ROW FORMAT:
+
+hive> create table prueba_orders3 ROW FORMAT DELIMITED FIELDS TERMINATED BY ','  AS Select * from default.orders where cust_id > 10000 limit 100;
+Query ID = cloudera_20160911123030_e5dc19e7-b9e7-40de-b0a4-ccc3c3c1d5e1
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0034, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0034/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0034
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-11 13:10:18,075 Stage-1 map = 0%,  reduce = 0%
+2016-09-11 13:10:23,279 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.52 sec
+2016-09-11 13:10:29,503 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.18 sec
+MapReduce Total cumulative CPU time: 3 seconds 180 msec
+Ended Job = job_1473156829873_0034
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/prueba_orders3
+Table db_pruebas.prueba_orders3 stats: [numFiles=1, numRows=100, totalSize=3600, rawDataSize=3500]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.18 sec   HDFS Read: 11004 HDFS Write: 3684 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 180 msec
+OK
+Time taken: 18.484 seconds
+
+
+[cloudera@quickstart ~]$ hadoop fs -cat /user/hive/warehouse/db_pruebas.db/prueba_orders3/*
+5000100,1181081,2008-06-02 01:45:26
+5000099,1007621,2008-06-02 01:33:39
+5000098,1162453,2008-06-02 01:18:34
+5000097,1081686,2008-06-02 01:13:45
+5000096,1036233,2008-06-02 01:05:41
+5000095,1087468,2008-06-02 00:42:35
+5000094,1184531,2008-06-02 00:34:03
+5000093,1139100,2008-06-02 00:09:34
+5000092,1128462,2008-06-02 00:02:58
+5000091,1107361,2008-06-01 23:41:12
+5000090,1189297,2008-06-01 23:29:40
+5000089,1102704,2008-06-01 23:14:17
+5000088,1126210,2008-06-01 22:56:31
+5000087,1077327,2008-06-01 22:39:42
+5000086,1047801,2008-06-01 22:07:46
+5000085,1060737,2008-06-01 21:49:55
+5000084,1075733,2008-06-01 21:37:24
+5000083,1189839,2008-06-01 21:36:29
+5000082,1195580,2008-06-01 21:36:25
+5000081,1135318,2008-06-01 21:35:06
+5000080,1085588,2008-06-01 21:25:50
+5000079,1017961,2008-06-01 20:50:32
+5000078,1060746,2008-06-01 20:48:23
+5000077,1052650,2008-06-01 20:47:22
+5000076,1038534,2008-06-01 20:46:49
+5000075,1129774,2008-06-01 20:43:50
+5000074,1103199,2008-06-01 20:41:08
+5000073,1087004,2008-06-01 20:33:19
+5000072,1063471,2008-06-01 20:27:58
+5000071,1024753,2008-06-01 20:12:54
+5000070,1178891,2008-06-01 20:11:16
+5000069,1088073,2008-06-01 20:07:38
+5000068,1157698,2008-06-01 20:05:42
+5000067,1061599,2008-06-01 20:04:11
+5000066,1180501,2008-06-01 19:58:28
+5000065,1198330,2008-06-01 19:56:58
+5000064,1084663,2008-06-01 19:56:52
+5000063,1190679,2008-06-01 19:27:48
+5000062,1118545,2008-06-01 19:27:36
+5000061,1096192,2008-06-01 19:19:24
+5000060,1190979,2008-06-01 18:50:26
+5000059,1060173,2008-06-01 18:44:53
+5000058,1032769,2008-06-01 18:19:09
+5000057,1121662,2008-06-01 18:15:30
+5000056,1139494,2008-06-01 18:11:56
+5000055,1040476,2008-06-01 18:08:13
+5000054,1005477,2008-06-01 17:57:32
+5000053,1030307,2008-06-01 17:45:13
+5000052,1138384,2008-06-01 17:30:28
+5000051,1068985,2008-06-01 17:14:29
+5000050,1171437,2008-06-01 16:44:53
+5000049,1197413,2008-06-01 16:42:22
+5000048,1064279,2008-06-01 16:40:55
+5000047,1176650,2008-06-01 16:28:07
+5000046,1186063,2008-06-01 16:08:39
+5000045,1019676,2008-06-01 16:01:17
+5000044,1087614,2008-06-01 15:51:21
+5000043,1176677,2008-06-01 15:27:40
+5000042,1188454,2008-06-01 15:19:09
+5000041,1127277,2008-06-01 15:08:03
+5000040,1032008,2008-06-01 14:57:55
+5000039,1042765,2008-06-01 14:33:19
+5000038,1191886,2008-06-01 14:30:53
+5000037,1080398,2008-06-01 14:04:32
+5000036,1110155,2008-06-01 13:48:48
+5000035,1148971,2008-06-01 13:37:03
+5000034,1152638,2008-06-01 13:27:31
+5000033,1131836,2008-06-01 13:16:12
+5000032,1187037,2008-06-01 12:55:18
+5000031,1019785,2008-06-01 12:33:56
+5000030,1044320,2008-06-01 12:21:09
+5000029,1071230,2008-06-01 12:13:10
+5000028,1093509,2008-06-01 11:52:34
+5000027,1029686,2008-06-01 11:27:32
+5000026,1178685,2008-06-01 11:19:58
+5000025,1140894,2008-06-01 10:57:34
+5000024,1009313,2008-06-01 10:50:52
+5000023,1113902,2008-06-01 09:33:23
+5000022,1141245,2008-06-01 09:21:50
+5000021,1050116,2008-06-01 08:42:10
+5000020,1196823,2008-06-01 07:21:52
+5000019,1151186,2008-06-01 07:14:53
+5000018,1068720,2008-06-01 07:11:47
+5000017,1166770,2008-06-01 07:07:25
+5000016,1023273,2008-06-01 06:47:02
+5000015,1065599,2008-06-01 05:50:54
+5000014,1072281,2008-06-01 05:33:52
+5000013,1177635,2008-06-01 04:55:30
+5000012,1176193,2008-06-01 04:26:43
+5000011,1040383,2008-06-01 03:20:59
+5000010,1107526,2008-06-01 03:07:14
+5000009,1096744,2008-06-01 01:49:46
+5000008,1064002,2008-06-01 01:36:52
+5000007,1048773,2008-06-01 01:36:35
+5000006,1187459,2008-06-01 01:11:09
+5000005,1020687,2008-06-01 01:08:36
+5000004,1159099,2008-06-01 01:05:28
+5000003,1153459,2008-06-01 00:49:37
+5000002,1131278,2008-06-01 00:27:42
+5000001,1133938,2008-06-01 00:03:35
+
+
+
+f) CREAR TABLA CON COPIA DE DEFINICION (LIKE) - Pero no carga datos:
+
+hive> create table prueba_orders2 like default.orders;
+OK
+Time taken: 0.079 seconds
+hive> show tables;
+OK
+prueba_orders
+prueba_orders2
+prueba_orders3
+
+[cloudera@quickstart ~]$ hadoop fs -cat /user/hive/warehouse/db_pruebas.db/prueba_orders2/*
+cat: `/user/hive/warehouse/db_pruebas.db/prueba_orders2/*': No such file or directory
+
+
+g) TABLAS TEMPORALES Y EXTERNAL:
+
+Las tablas temporales se crean y solo tienen ambito en la sesion de hive en la que estas:
+
+
+hive> create temporary table prueba4 like prueba_orders location '/user/hive/warehouse/db_pruebas.db/prueba_orders';
+OK
+Time taken: 0.077 seconds
+
+hive> show tables;
+OK
+prueba4
+prueba_orders
+prueba_orders2
+prueba_orders3
+Time taken: 0.014 seconds, Fetched: 4 row(s)
+
+hive> select * from prueba4;
+OK
+5000100	1181081	2008-06-02 01:45:26
+5000099	1007621	2008-06-02 01:33:39
+5000098	1162453	2008-06-02 01:18:34
+5000097	1081686	2008-06-02 01:13:45
+5000096	1036233	2008-06-02 01:05:41
+5000095	1087468	2008-06-02 00:42:35
+5000094	1184531	2008-06-02 00:34:03
+5000093	1139100	2008-06-02 00:09:34
+...
+...
+...
+Time taken: 0.039 seconds, Fetched: 100 row(s)
+
+
+Salimos de sesion y volvemos a entrar:
+
+hive> exit;
+WARN: The method class org.apache.commons.logging.impl.SLF4JLogFactory#release() was invoked.
+WARN: Please see http://www.slf4j.org/codes.html#release for an explanation.
+
+[cloudera@quickstart ~]$ hive
+2016-09-12 03:48:24,270 WARN  [main] mapreduce.TableMapReduceUtil: The hbase-prefix-tree module jar containing PrefixTreeCodec is not present.  Continuing without it.
+
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+
+hive> use db_pruebas;
+OK
+Time taken: 0.035 seconds
+
+hive> show tables;
+OK
+prueba_orders
+prueba_orders2
+prueba_orders3
+Time taken: 0.023 seconds, Fetched: 3 row(s)
+
+
+
+
+Las tablas externas sirven para aplicar un vinculo temporal a tablas ya existentes. Cuando se borren las tablas se borra el vinculo pero no los ficheros:
+
+hive> create external table prueba4 like prueba_orders;
+OK
+Time taken: 0.228 seconds
+
+No es obligatorio el location, pero si no lo pones y apuntas a un directorio ya creado con otra tabla, no estas haciendo un vinculo estas creando una nueva tabla. Cuando se haga un drop de prueba4 se quedaran los ficheros alli:
+
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/db*.db
+Found 4 items
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:16 /user/hive/warehouse/db_pruebas.db/prueba4
+drwxrwxrwx   - cloudera supergroup          0 2016-09-11 13:06 /user/hive/warehouse/db_pruebas.db/prueba_orders
+drwxrwxrwx   - cloudera supergroup          0 2016-09-11 13:07 /user/hive/warehouse/db_pruebas.db/prueba_orders2
+drwxrwxrwx   - cloudera supergroup          0 2016-09-11 13:10 /user/hive/warehouse/db_pruebas.db/prueba_orders3
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/db*.db/*4
+[cloudera@quickstart ~]$ 
+
+hive> drop table prueba4;
+OK
+Time taken: 0.095 seconds
+
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/db*.db
+Found 4 items
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:16 /user/hive/warehouse/db_pruebas.db/prueba4
+drwxrwxrwx   - cloudera supergroup          0 2016-09-11 13:06 /user/hive/warehouse/db_pruebas.db/prueba_orders
+drwxrwxrwx   - cloudera supergroup          0 2016-09-11 13:07 /user/hive/warehouse/db_pruebas.db/prueba_orders2
+drwxrwxrwx   - cloudera supergroup          0 2016-09-11 13:10 /user/hive/warehouse/db_pruebas.db/prueba_orders3
+
+
+Lo suyo es apuntar a la tabla de referencia. Borramos y volvemos a crear:
+
+[cloudera@quickstart ~]$ hadoop fs -rm -r /user/hive/warehouse/db*.db/*4
+Deleted /user/hive/warehouse/db_pruebas.db/prueba4
+
+hive> create external table prueba4 like prueba_orders location '/user/hive/warehouse/db_pruebas.db/prueba_orders';
+OK
+Time taken: 0.059 seconds
+
+hive> show tables;
+OK
+prueba4
+prueba_orders
+prueba_orders2
+prueba_orders3
+Time taken: 0.013 seconds, Fetched: 4 row(s)
+
+hive> select * from prueba4;
+OK
+5000100	1181081	2008-06-02 01:45:26
+5000099	1007621	2008-06-02 01:33:39
+5000098	1162453	2008-06-02 01:18:34
+5000097	1081686	2008-06-02 01:13:45
+5000096	1036233	2008-06-02 01:05:41
+5000095	1087468	2008-06-02 00:42:35
+5000094	1184531	2008-06-02 00:34:03
+5000093	1139100	2008-06-02 00:09:34
+5000092	1128462	2008-06-02 00:02:58
+5000091	1107361	2008-06-01 23:41:12
+5000090	1189297	2008-06-01 23:29:40
+5000089	1102704	2008-06-01 23:14:17
+5000088	1126210	2008-06-01 22:56:31
+5000087	1077327	2008-06-01 22:39:42
+5000086	1047801	2008-06-01 22:07:46
+5000085	1060737	2008-06-01 21:49:55
+5000084	1075733	2008-06-01 21:37:24
+5000083	1189839	2008-06-01 21:36:29
+5000082	1195580	2008-06-01 21:36:25
+5000081	1135318	2008-06-01 21:35:06
+5000080	1085588	2008-06-01 21:25:50
+5000079	1017961	2008-06-01 20:50:32
+5000078	1060746	2008-06-01 20:48:23
+5000077	1052650	2008-06-01 20:47:22
+5000076	1038534	2008-06-01 20:46:49
+5000075	1129774	2008-06-01 20:43:50
+5000074	1103199	2008-06-01 20:41:08
+5000073	1087004	2008-06-01 20:33:19
+5000072	1063471	2008-06-01 20:27:58
+5000071	1024753	2008-06-01 20:12:54
+5000070	1178891	2008-06-01 20:11:16
+5000069	1088073	2008-06-01 20:07:38
+5000068	1157698	2008-06-01 20:05:42
+5000067	1061599	2008-06-01 20:04:11
+5000066	1180501	2008-06-01 19:58:28
+5000065	1198330	2008-06-01 19:56:58
+5000064	1084663	2008-06-01 19:56:52
+5000063	1190679	2008-06-01 19:27:48
+5000062	1118545	2008-06-01 19:27:36
+5000061	1096192	2008-06-01 19:19:24
+5000060	1190979	2008-06-01 18:50:26
+5000059	1060173	2008-06-01 18:44:53
+5000058	1032769	2008-06-01 18:19:09
+5000057	1121662	2008-06-01 18:15:30
+5000056	1139494	2008-06-01 18:11:56
+5000055	1040476	2008-06-01 18:08:13
+5000054	1005477	2008-06-01 17:57:32
+5000053	1030307	2008-06-01 17:45:13
+5000052	1138384	2008-06-01 17:30:28
+5000051	1068985	2008-06-01 17:14:29
+5000050	1171437	2008-06-01 16:44:53
+5000049	1197413	2008-06-01 16:42:22
+5000048	1064279	2008-06-01 16:40:55
+5000047	1176650	2008-06-01 16:28:07
+5000046	1186063	2008-06-01 16:08:39
+5000045	1019676	2008-06-01 16:01:17
+5000044	1087614	2008-06-01 15:51:21
+5000043	1176677	2008-06-01 15:27:40
+5000042	1188454	2008-06-01 15:19:09
+5000041	1127277	2008-06-01 15:08:03
+5000040	1032008	2008-06-01 14:57:55
+5000039	1042765	2008-06-01 14:33:19
+5000038	1191886	2008-06-01 14:30:53
+5000037	1080398	2008-06-01 14:04:32
+5000036	1110155	2008-06-01 13:48:48
+5000035	1148971	2008-06-01 13:37:03
+5000034	1152638	2008-06-01 13:27:31
+5000033	1131836	2008-06-01 13:16:12
+5000032	1187037	2008-06-01 12:55:18
+5000031	1019785	2008-06-01 12:33:56
+5000030	1044320	2008-06-01 12:21:09
+5000029	1071230	2008-06-01 12:13:10
+5000028	1093509	2008-06-01 11:52:34
+5000027	1029686	2008-06-01 11:27:32
+5000026	1178685	2008-06-01 11:19:58
+5000025	1140894	2008-06-01 10:57:34
+5000024	1009313	2008-06-01 10:50:52
+5000023	1113902	2008-06-01 09:33:23
+5000022	1141245	2008-06-01 09:21:50
+5000021	1050116	2008-06-01 08:42:10
+5000020	1196823	2008-06-01 07:21:52
+5000019	1151186	2008-06-01 07:14:53
+5000018	1068720	2008-06-01 07:11:47
+5000017	1166770	2008-06-01 07:07:25
+5000016	1023273	2008-06-01 06:47:02
+5000015	1065599	2008-06-01 05:50:54
+5000014	1072281	2008-06-01 05:33:52
+5000013	1177635	2008-06-01 04:55:30
+5000012	1176193	2008-06-01 04:26:43
+5000011	1040383	2008-06-01 03:20:59
+5000010	1107526	2008-06-01 03:07:14
+5000009	1096744	2008-06-01 01:49:46
+5000008	1064002	2008-06-01 01:36:52
+5000007	1048773	2008-06-01 01:36:35
+5000006	1187459	2008-06-01 01:11:09
+5000005	1020687	2008-06-01 01:08:36
+5000004	1159099	2008-06-01 01:05:28
+5000003	1153459	2008-06-01 00:49:37
+5000002	1131278	2008-06-01 00:27:42
+5000001	1133938	2008-06-01 00:03:35
+Time taken: 0.062 seconds, Fetched: 100 row(s)
+
+
+Y en hdfs no tenemos ninguna carpeta nueva:
+
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/db*.db/
+Found 3 items
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:25 /user/hive/warehouse/db_pruebas.db/prueba_orders
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:27 /user/hive/warehouse/db_pruebas.db/prueba_orders2
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:27 /user/hive/warehouse/db_pruebas.db/prueba_orders3
+
+Se puede borrar y no afectamos al origen:
+
+hive> drop table prueba4;
+OK
+Time taken: 0.094 seconds
+hive> select * from prueba_orders limit 2;
+OK
+5000100	1181081	2008-06-02 01:45:26
+5000099	1007621	2008-06-02 01:33:39
+Time taken: 0.054 seconds, Fetched: 2 row(s)
+
+
+h) PARTICIONES (1a parte)
+Crearemos una tabla particionada y manualmente cargaremos datos a la particion correcta.
+Lo suyo es irlo haciendo con INSERT partiendo de una SELECT de la tabla origen pero en un primer momento lo haremos asi.
+
+Creamos la tabla particionada:
+
+hive> create table partitioned_orders ( order_id INT, cust_id INT) partitioned by (year INT, month INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+OK
+Time taken: 0.069 seconds
+
+hive> show tables;
+OK
+partitioned_orders
+prueba_orders
+prueba_orders2
+prueba_orders3
+Time taken: 0.014 seconds, Fetched: 4 row(s)
+
+hive> show partitions partitioned_orders;
+OK
+Time taken: 0.058 seconds
+
+hive> describe partitioned_orders;
+OK
+order_id            	int                 	                    
+cust_id             	int                 	                    
+year                	int                 	                    
+month               	int                 	                    
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+year                	int                 	                    
+month               	int                 	                    
+Time taken: 0.069 seconds, Fetched: 10 row(s)
+
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/db*.db/
+Found 4 items
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 05:18 /user/hive/warehouse/db_pruebas.db/partitioned_orders
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:25 /user/hive/warehouse/db_pruebas.db/prueba_orders
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:27 /user/hive/warehouse/db_pruebas.db/prueba_orders2
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 04:27 /user/hive/warehouse/db_pruebas.db/prueba_orders3
+[cloudera@quickstart ~]$ hadoop fs -ls /user/hive/warehouse/db*.db/partitioned_orders
+[cloudera@quickstart ~]$ 
+
+
+De momento no tiene particiones con datos, por eso no aparecen carpetas. Lo que si nos indica el describe es que hay particiones asignadas.
+
+
+Cogemos un fichero de orders y lo filtramos adecuadamente para cargarlo en una particion:
+Cogemos estos datos:
+5000100,1181081,2008-06-02 01:45:26
+5000099,1007621,2008-06-02 01:33:39
+5000098,1162453,2008-06-02 01:18:34
+5000097,1081686,2008-06-02 01:13:45
+5000096,1036233,2008-06-02 01:05:41
+5000095,1087468,2008-06-02 00:42:35
+5000094,1184531,2008-06-02 00:34:03
+5000093,1139100,2008-06-02 00:09:34
+5000092,1128462,2008-06-02 00:02:58
+
+Y los cargamos como un fichero nuevo eliminando la columna order_date e indicandole la particion 2008/06
+
+[cloudera@quickstart ~]$ hadoop fs -put 000000_0 /user/cloudera
+[cloudera@quickstart ~]$ hadoop fs -ls /user/cloudera
+Found 4 items
+drwxr-xr-x   - cloudera cloudera          0 2016-09-07 09:12 /user/cloudera/.Trash
+drwxr-xr-x   - cloudera cloudera          0 2016-06-25 02:09 /user/cloudera/.sparkStaging
+-rw-r--r--   1 cloudera cloudera        145 2016-09-12 05:28 /user/cloudera/000000_0
+drwxr-xr-x   - cloudera cloudera          0 2016-09-09 05:28 /user/cloudera/_sqoop
+
+
+hive> load data inpath '/user/cloudera/000000_0' into table partitioned_orders partition (year=2008,month=06);
+Loading data to table db_pruebas.partitioned_orders partition (year=2008, month=06)
+chgrp: changing ownership of 'hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/partitioned_orders/year=2008/month=06/000000_0': User does not belong to supergroup
+Partition db_pruebas.partitioned_orders{year=2008, month=06} stats: [numFiles=1, numRows=0, totalSize=145, rawDataSize=0]
+OK
+Time taken: 0.648 seconds
+hive> select * from partitioned_orders;
+OK
+5000100	1181081	2008	6
+5000099	1007621	2008	6
+5000098	1162453	2008	6
+5000097	1081686	2008	6
+5000096	1036233	2008	6
+5000095	1087468	2008	6
+5000094	1184531	2008	6
+5000093	1139100	2008	6
+5000092	1128462	2008	6
+NULL	NULL	2008	6
+Time taken: 0.163 seconds, Fetched: 10 row(s)
+hive> select * from partitioned_orders where year=2008;
+OK
+5000100	1181081	2008	6
+5000099	1007621	2008	6
+5000098	1162453	2008	6
+5000097	1081686	2008	6
+5000096	1036233	2008	6
+5000095	1087468	2008	6
+5000094	1184531	2008	6
+5000093	1139100	2008	6
+5000092	1128462	2008	6
+NULL	NULL	2008	6
+Time taken: 0.442 seconds, Fetched: 10 row(s)
+
+hive> show partitions partitioned_orders;
+OK
+year=2008/month=06
+Time taken: 0.05 seconds, Fetched: 1 row(s)
+
+Ahora si tenemos particiones y se puede consultar por ellas. La disposicion de los ficheros es la siguiente:
+[cloudera@quickstart ~]$ hadoop fs -ls -R /user/hive/warehouse/db*.db/partitioned_orders
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 05:30 /user/hive/warehouse/db_pruebas.db/partitioned_orders/year=2008
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 05:30 /user/hive/warehouse/db_pruebas.db/partitioned_orders/year=2008/month=06
+-rwxrwxrwx   1 cloudera cloudera          145 2016-09-12 05:28 /user/hive/warehouse/db_pruebas.db/partitioned_orders/year=2008/month=06/000000_0
+
+
+Podemos hacer lo mismo con otra particion:
+
+hive> load data inpath '/user/cloudera/000000_0' into table partitioned_orders partition (year=2008,month=05);
+Loading data to table db_pruebas.partitioned_orders partition (year=2008, month=05)
+chgrp: changing ownership of 'hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/partitioned_orders/year=2008/month=05/000000_0': User does not belong to supergroup
+Partition db_pruebas.partitioned_orders{year=2008, month=05} stats: [numFiles=1, numRows=0, totalSize=161, rawDataSize=0]
+OK
+Time taken: 0.41 seconds
+
+hive> show partitions partitioned_orders;
+OK
+year=2008/month=05
+year=2008/month=06
+Time taken: 0.049 seconds, Fetched: 2 row(s)
+
+Y podemos hacer consultas con las particiones y los campos:
+hive> select * from partitioned_orders where year=2008;
+OK
+5000091	1107361	2008	5
+5000090	1189297	2008	5
+5000089	1102704	2008	5
+5000088	1126210	2008	5
+5000087	1077327	2008	5
+5000086	1047801	2008	5
+5000085	1060737	2008	5
+5000084	1075733	2008	5
+5000083	1189839	2008	5
+5000082	1195580	2008	5
+NULL	NULL	2008	5
+5000100	1181081	2008	6
+5000099	1007621	2008	6
+5000098	1162453	2008	6
+5000097	1081686	2008	6
+5000096	1036233	2008	6
+5000095	1087468	2008	6
+5000094	1184531	2008	6
+5000093	1139100	2008	6
+5000092	1128462	2008	6
+NULL	NULL	2008	6
+Time taken: 0.105 seconds, Fetched: 21 row(s)
+hive> select * from partitioned_orders where year=2008 and month=6;
+OK
+5000100	1181081	2008	6
+5000099	1007621	2008	6
+5000098	1162453	2008	6
+5000097	1081686	2008	6
+5000096	1036233	2008	6
+5000095	1087468	2008	6
+5000094	1184531	2008	6
+5000093	1139100	2008	6
+5000092	1128462	2008	6
+NULL	NULL	2008	6
+Time taken: 0.092 seconds, Fetched: 10 row(s)
+hive> select * from partitioned_orders where year=2008 and month=6 or cust_id=1195580;
+OK
+5000082	1195580	2008	5
+5000100	1181081	2008	6
+5000099	1007621	2008	6
+5000098	1162453	2008	6
+5000097	1081686	2008	6
+5000096	1036233	2008	6
+5000095	1087468	2008	6
+5000094	1184531	2008	6
+5000093	1139100	2008	6
+5000092	1128462	2008	6
+NULL	NULL	2008	6
+Time taken: 0.08 seconds, Fetched: 11 row(s)
+
+
+Y si no le indico particion???
+
+hive> load data inpath '/user/cloudera/000000_0' into table partitioned_orders;
+FAILED: SemanticException [Error 10062]: Need to specify partition columns because the destination table is partitioned
+
+
+Y si mando un archivo con un id que ya existe???
+
+hive> load data inpath '/user/cloudera/000000_0' into table partitioned_orders partition (year=2008,month=04);
+Loading data to table db_pruebas.partitioned_orders partition (year=2008, month=04)
+chgrp: changing ownership of 'hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/partitioned_orders/year=2008/month=04/000000_0': User does not belong to supergroup
+Partition db_pruebas.partitioned_orders{year=2008, month=04} stats: [numFiles=1, numRows=0, totalSize=17, rawDataSize=0]
+OK
+Time taken: 2.514 seconds
+
+hive> select * from partitioned_orders where year=2008;
+OK
+5000091	1107361	2008	4
+NULL	NULL	2008	4
+5000091	1107361	2008	5
+5000090	1189297	2008	5
+5000089	1102704	2008	5
+5000088	1126210	2008	5
+5000087	1077327	2008	5
+5000086	1047801	2008	5
+5000085	1060737	2008	5
+5000084	1075733	2008	5
+5000083	1189839	2008	5
+5000082	1195580	2008	5
+NULL	NULL	2008	5
+5000100	1181081	2008	6
+5000099	1007621	2008	6
+5000098	1162453	2008	6
+5000097	1081686	2008	6
+5000096	1036233	2008	6
+5000095	1087468	2008	6
+5000094	1184531	2008	6
+5000093	1139100	2008	6
+5000092	1128462	2008	6
+NULL	NULL	2008	6
+Time taken: 0.083 seconds, Fetched: 23 row(s)
+
+hive> select * from partitioned_orders where order_id=5000091;
+OK
+5000091	1107361	2008	4
+5000091	1107361	2008	5
+Time taken: 0.081 seconds, Fetched: 2 row(s)
+
+
+Se lo come pero porque no hay primary key
+
+hive> describe partitioned_orders;
+OK
+order_id            	int                 	                    
+cust_id             	int                 	                    
+year                	int                 	                    
+month               	int                 	                    
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+year                	int                 	                    
+month               	int                 	                    
+Time taken: 0.088 seconds, Fetched: 10 row(s)
+
+
+i) MODIFICACIONES DE UNA TABLA:
+MOdificar el nombre de una tabla:
+
+hive> alter table partitioned_orders rename to part_orders;
+OK
+Time taken: 0.186 seconds
+
+hive> describe partitioned_orders;
+FAILED: SemanticException [Error 10001]: Table not found partitioned_orders
+
+hive> describe part_orders;
+OK
+order_id            	int                 	                    
+cust_id             	int                 	                    
+year                	int                 	                    
+month               	int                 	                    
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+year                	int                 	                    
+month               	int                 	                    
+Time taken: 0.057 seconds, Fetched: 10 row(s)
+
+[cloudera@quickstart ~]$ hadoop fs -ls -R /user/hive/warehouse/db*.db/part*
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 05:48 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 05:48 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=04
+-rwxrwxrwx   1 cloudera cloudera           17 2016-09-12 05:48 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=04/000000_0
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 05:38 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=05
+-rwxrwxrwx   1 cloudera cloudera          161 2016-09-12 05:37 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=05/000000_0
+drwxrwxrwx   - cloudera supergroup          0 2016-09-12 05:30 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=06
+-rwxrwxrwx   1 cloudera cloudera          145 2016-09-12 05:28 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=06/000000_0
+
+
+Modificar el nombre de un campo:
+
+hive> describe prueba_orders;
+OK
+order_id            	int                 	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+Time taken: 0.06 seconds, Fetched: 3 row(s)
+hive> alter table prueba_orders change order_id id_order INT;
+OK
+Time taken: 0.122 seconds
+hive> describe prueba_orders;
+OK
+id_order            	int                 	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+Time taken: 0.056 seconds, Fetched: 3 row(s)
+
+Modificar el tipo de un campo
+
+hive> alter table prueba_orders change id_order id_order BIGINT;
+OK
+Time taken: 0.105 seconds
+hive> describe prueba_orders;
+OK
+id_order            	bigint              	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+Time taken: 0.058 seconds, Fetched: 3 row(s)
+
+
+Añadir, mover y borrar columnas
+
+hive> alter table prueba_orders add columns (bonus INT);
+OK
+Time taken: 0.112 seconds
+hive> describe prueba_orders;
+OK
+id_order            	bigint              	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+bonus               	int                 	                    
+Time taken: 0.084 seconds, Fetched: 4 row(s)
+
+hive> select * from prueba_orders limit 10;
+OK
+5000100	1181081	2008-06-02 01:45:26	NULL
+5000099	1007621	2008-06-02 01:33:39	NULL
+5000098	1162453	2008-06-02 01:18:34	NULL
+5000097	1081686	2008-06-02 01:13:45	NULL
+5000096	1036233	2008-06-02 01:05:41	NULL
+5000095	1087468	2008-06-02 00:42:35	NULL
+5000094	1184531	2008-06-02 00:34:03	NULL
+5000093	1139100	2008-06-02 00:09:34	NULL
+5000092	1128462	2008-06-02 00:02:58	NULL
+5000091	1107361	2008-06-01 23:41:12	NULL
+Time taken: 0.053 seconds, Fetched: 10 row(s)
+
+
+OBS: Si la añadimos al final no pasa nada, nos marca la columna como null. Pero si la incluimos en medio tenemos un gran problema:
+Si coloco la columna bonus, una vez añadida despues de la columna order_id:
+
+hive> alter table prueba_orders change bonus bouns INT after id_order;
+OK
+Time taken: 0.109 seconds
+hive> describe prueba_orders;
+OK
+id_order            	bigint              	                    
+bouns               	int                 	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+Time taken: 0.061 seconds, Fetched: 4 row(s)
+
+
+Todo lo que haya a continuacion y no cuadre en tipos me marcara un null:
+
+hive> select * from prueba_orders limit 10;
+OK
+5000100	1181081	NULL	NULL
+5000099	1007621	NULL	NULL
+5000098	1162453	NULL	NULL
+5000097	1081686	NULL	NULL
+5000096	1036233	NULL	NULL
+5000095	1087468	NULL	NULL
+5000094	1184531	NULL	NULL
+5000093	1139100	NULL	NULL
+5000092	1128462	NULL	NULL
+5000091	1107361	NULL	NULL
+Time taken: 0.05 seconds, Fetched: 10 row(s)
+
+Reemplazamos la definicion por la antigua:
+
+hive> alter table prueba_orders replace columns (order_id INT, cust_id INT, order_date TIMESTAMP);
+OK
+Time taken: 0.083 seconds
+
+hive> describe prueba_orders;
+OK
+order_id            	int                 	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+Time taken: 0.058 seconds, Fetched: 3 row(s)
+
+hive> select * from prueba_orders limit 10;
+OK
+5000100	1181081	2008-06-02 01:45:26
+5000099	1007621	2008-06-02 01:33:39
+5000098	1162453	2008-06-02 01:18:34
+5000097	1081686	2008-06-02 01:13:45
+5000096	1036233	2008-06-02 01:05:41
+5000095	1087468	2008-06-02 00:42:35
+5000094	1184531	2008-06-02 00:34:03
+5000093	1139100	2008-06-02 00:09:34
+5000092	1128462	2008-06-02 00:02:58
+5000091	1107361	2008-06-01 23:41:12
+Time taken: 0.064 seconds, Fetched: 10 row(s)
+
+
+j) VER PROPIEDADES DE UNA TABLA:
+
+hive> show TBLPROPERTIES prueba_orders;
+OK
+COLUMN_STATS_ACCURATE	false
+last_modified_by	cloudera
+last_modified_time	1473701045
+numFiles	1
+numRows	-1
+rawDataSize	-1
+totalSize	3600
+transient_lastDdlTime	1473701045
+Time taken: 0.034 seconds, Fetched: 8 row(s)
+
+hive> show TBLPROPERTIES prueba_orders('totalSize');
+OK
+3600	 
+Time taken: 0.036 seconds, Fetched: 1 row(s)
+
+
+Tambien de esta forma:
+
+hive> DESCRIBE EXTENDED prueba_orders;
+OK
+order_id            	int                 	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+	 	 
+Detailed Table Information	Table(tableName:prueba_orders, dbName:db_pruebas, owner:cloudera, createTime:1473679544, lastAccessTime:0, retention:0, sd:StorageDescriptor(cols:[FieldSchema(name:order_id, type:int, comment:null), FieldSchema(name:cust_id, type:int, comment:null), FieldSchema(name:order_date, type:timestamp, comment:null)], location:hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/prueba_orders, inputFormat:org.apache.hadoop.mapred.TextInputFormat, outputFormat:org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat, compressed:false, numBuckets:-1, serdeInfo:SerDeInfo(name:null, serializationLib:org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, parameters:{serialization.format=1}), bucketCols:[], sortCols:[], parameters:{}, skewedInfo:SkewedInfo(skewedColNames:[], skewedColValues:[], skewedColValueLocationMaps:{}), storedAsSubDirectories:false), partitionKeys:[], parameters:{numFiles=1, last_modified_by=cloudera, last_modified_time=1473701045, transient_lastDdlTime=1473701045, COLUMN_STATS_ACCURATE=false, totalSize=3600, numRows=-1, rawDataSize=-1}, viewOriginalText:null, viewExpandedText:null, tableType:MANAGED_TABLE)	
+Time taken: 0.082 seconds, Fetched: 5 row(s)
+
+
+
+k) CREACION DE VISTAS:
+Podemos hacer la siguiente consulta:
+
+hive> select o.order_id, order_date, p.prod_id from orders o join order_details p on (o.order_id = p.order_id) where o.order_id <=5000101;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Stage-1 is selected by condition resolver.
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0038, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0038/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0038
+Hadoop job information for Stage-1: number of mappers: 2; number of reducers: 1
+2016-09-12 11:09:26,878 Stage-1 map = 0%,  reduce = 0%
+2016-09-12 11:09:34,262 Stage-1 map = 50%,  reduce = 0%, Cumulative CPU 2.73 sec
+2016-09-12 11:09:35,299 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.57 sec
+2016-09-12 11:09:40,539 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.27 sec
+MapReduce Total cumulative CPU time: 7 seconds 270 msec
+Ended Job = job_1473156829873_0038
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 2  Reduce: 1   Cumulative CPU: 7.27 sec   HDFS Read: 57594210 HDFS Write: 7596 SUCCESS
+Total MapReduce CPU Time Spent: 7 seconds 270 msec
+OK
+5000001	2008-06-01 00:03:35	1273719
+5000001	2008-06-01 00:03:35	1273767
+5000001	2008-06-01 00:03:35	1273779
+5000002	2008-06-01 00:27:42	1274124
+5000002	2008-06-01 00:27:42	1273737
+5000002	2008-06-01 00:27:42	1274227
+5000003	2008-06-01 00:49:37	1274473
+5000003	2008-06-01 00:49:37	1273673
+5000004	2008-06-01 01:05:28	1274216
+5000004	2008-06-01 01:05:28	1273748
+5000005	2008-06-01 01:08:36	1274348
+5000005	2008-06-01 01:08:36	1273719
+5000006	2008-06-01 01:11:09	1274190
+5000006	2008-06-01 01:11:09	1274200
+5000007	2008-06-01 01:36:35	1274157
+5000008	2008-06-01 01:36:52	1274168
+5000008	2008-06-01 01:36:52	1274164
+5000009	2008-06-01 01:49:46	1274322
+5000009	2008-06-01 01:49:46	1274265
+5000010	2008-06-01 03:07:14	1274225
+5000011	2008-06-01 03:20:59	1273650
+5000011	2008-06-01 03:20:59	1273742
+5000011	2008-06-01 03:20:59	1274741
+5000012	2008-06-01 04:26:43	1274606
+5000013	2008-06-01 04:55:30	1274371
+5000014	2008-06-01 05:33:52	1274686
+5000014	2008-06-01 05:33:52	1273863
+5000014	2008-06-01 05:33:52	1273653
+5000015	2008-06-01 05:50:54	1273744
+5000015	2008-06-01 05:50:54	1273766
+5000016	2008-06-01 06:47:02	1274048
+5000016	2008-06-01 06:47:02	1273982
+5000017	2008-06-01 07:07:25	1274637
+5000017	2008-06-01 07:07:25	1273977
+5000018	2008-06-01 07:11:47	1274501
+5000019	2008-06-01 07:14:53	1273896
+5000019	2008-06-01 07:14:53	1273746
+5000020	2008-06-01 07:21:52	1274644
+5000020	2008-06-01 07:21:52	1273674
+5000021	2008-06-01 08:42:10	1274746
+5000021	2008-06-01 08:42:10	1273804
+5000021	2008-06-01 08:42:10	1273743
+5000022	2008-06-01 09:21:50	1274639
+5000023	2008-06-01 09:33:23	1274620
+5000024	2008-06-01 10:50:52	1274348
+5000024	2008-06-01 10:50:52	1273770
+5000025	2008-06-01 10:57:34	1274155
+5000025	2008-06-01 10:57:34	1274125
+5000025	2008-06-01 10:57:34	1273856
+5000026	2008-06-01 11:19:58	1274279
+5000026	2008-06-01 11:19:58	1273762
+5000027	2008-06-01 11:27:32	1274361
+5000028	2008-06-01 11:52:34	1274350
+5000029	2008-06-01 12:13:10	1274739
+5000029	2008-06-01 12:13:10	1273666
+5000029	2008-06-01 12:13:10	1273739
+5000030	2008-06-01 12:21:09	1274082
+5000030	2008-06-01 12:21:09	1273738
+5000031	2008-06-01 12:33:56	1274603
+5000031	2008-06-01 12:33:56	1273652
+5000031	2008-06-01 12:33:56	1273977
+5000032	2008-06-01 12:55:18	1274239
+5000033	2008-06-01 13:16:12	1273932
+5000034	2008-06-01 13:27:31	1274713
+5000035	2008-06-01 13:37:03	1273851
+5000035	2008-06-01 13:37:03	1273697
+5000036	2008-06-01 13:48:48	1274495
+5000037	2008-06-01 14:04:32	1273658
+5000037	2008-06-01 14:04:32	1273983
+5000038	2008-06-01 14:30:53	1273910
+5000039	2008-06-01 14:33:19	1274300
+5000039	2008-06-01 14:33:19	1273659
+5000039	2008-06-01 14:33:19	1273983
+5000039	2008-06-01 14:33:19	1273851
+5000040	2008-06-01 14:57:55	1274277
+5000040	2008-06-01 14:57:55	1274154
+5000041	2008-06-01 15:08:03	1273662
+5000041	2008-06-01 15:08:03	1273744
+5000041	2008-06-01 15:08:03	1273916
+5000041	2008-06-01 15:08:03	1274180
+5000041	2008-06-01 15:08:03	1273988
+5000042	2008-06-01 15:19:09	1274468
+5000043	2008-06-01 15:27:40	1274463
+5000043	2008-06-01 15:27:40	1273658
+5000043	2008-06-01 15:27:40	1273983
+5000044	2008-06-01 15:51:21	1274348
+5000045	2008-06-01 16:01:17	1274496
+5000045	2008-06-01 16:01:17	1274614
+5000046	2008-06-01 16:08:39	1274047
+5000046	2008-06-01 16:08:39	1273758
+5000047	2008-06-01 16:28:07	1273747
+5000047	2008-06-01 16:28:07	1273851
+5000047	2008-06-01 16:28:07	1273772
+5000048	2008-06-01 16:40:55	1274107
+5000048	2008-06-01 16:40:55	1273755
+5000049	2008-06-01 16:42:22	1274166
+5000049	2008-06-01 16:42:22	1273855
+5000050	2008-06-01 16:44:53	1274299
+5000050	2008-06-01 16:44:53	1273863
+5000051	2008-06-01 17:14:29	1274070
+5000051	2008-06-01 17:14:29	1273977
+5000052	2008-06-01 17:30:28	1274490
+5000052	2008-06-01 17:30:28	1274091
+5000053	2008-06-01 17:45:13	1273911
+5000053	2008-06-01 17:45:13	1273852
+5000053	2008-06-01 17:45:13	1274686
+5000054	2008-06-01 17:57:32	1274638
+5000054	2008-06-01 17:57:32	1274359
+5000055	2008-06-01 18:08:13	1274168
+5000055	2008-06-01 18:08:13	1273736
+5000056	2008-06-01 18:11:56	1273769
+5000056	2008-06-01 18:11:56	1274143
+5000056	2008-06-01 18:11:56	1273656
+5000056	2008-06-01 18:11:56	1273658
+5000057	2008-06-01 18:15:30	1274092
+5000057	2008-06-01 18:15:30	1273650
+5000058	2008-06-01 18:19:09	1274157
+5000058	2008-06-01 18:19:09	1274497
+5000058	2008-06-01 18:19:09	1273865
+5000059	2008-06-01 18:44:53	1274165
+5000059	2008-06-01 18:44:53	1273675
+5000060	2008-06-01 18:50:26	1274468
+5000060	2008-06-01 18:50:26	1274038
+5000061	2008-06-01 19:19:24	1274195
+5000061	2008-06-01 19:19:24	1274154
+5000062	2008-06-01 19:27:36	1274265
+5000062	2008-06-01 19:27:36	1273653
+5000062	2008-06-01 19:27:36	1273768
+5000063	2008-06-01 19:27:48	1274100
+5000063	2008-06-01 19:27:48	1274195
+5000064	2008-06-01 19:56:52	1274024
+5000065	2008-06-01 19:56:58	1274723
+5000066	2008-06-01 19:58:28	1273842
+5000066	2008-06-01 19:58:28	1273874
+5000067	2008-06-01 20:04:11	1273763
+5000067	2008-06-01 20:04:11	1274002
+5000067	2008-06-01 20:04:11	1274472
+5000068	2008-06-01 20:05:42	1274489
+5000068	2008-06-01 20:05:42	1273740
+5000068	2008-06-01 20:05:42	1273862
+5000069	2008-06-01 20:07:38	1274634
+5000069	2008-06-01 20:07:38	1274234
+5000069	2008-06-01 20:07:38	1274536
+5000070	2008-06-01 20:11:16	1274270
+5000071	2008-06-01 20:12:54	1273671
+5000071	2008-06-01 20:12:54	1274158
+5000071	2008-06-01 20:12:54	1274002
+5000072	2008-06-01 20:27:58	1274325
+5000072	2008-06-01 20:27:58	1274183
+5000073	2008-06-01 20:33:19	1274640
+5000074	2008-06-01 20:41:08	1273702
+5000074	2008-06-01 20:41:08	1273858
+5000075	2008-06-01 20:43:50	1274348
+5000075	2008-06-01 20:43:50	1273648
+5000075	2008-06-01 20:43:50	1273984
+5000075	2008-06-01 20:43:50	1274686
+5000076	2008-06-01 20:46:49	1274243
+5000076	2008-06-01 20:46:49	1274011
+5000077	2008-06-01 20:47:22	1274103
+5000078	2008-06-01 20:48:23	1274172
+5000079	2008-06-01 20:50:32	1274643
+5000079	2008-06-01 20:50:32	1273743
+5000079	2008-06-01 20:50:32	1273866
+5000080	2008-06-01 21:25:50	1273702
+5000080	2008-06-01 21:25:50	1273871
+5000080	2008-06-01 21:25:50	1273751
+5000080	2008-06-01 21:25:50	1274131
+5000080	2008-06-01 21:25:50	1273978
+5000081	2008-06-01 21:35:06	1273942
+5000081	2008-06-01 21:35:06	1274477
+5000082	2008-06-01 21:36:25	1274529
+5000083	2008-06-01 21:36:29	1274274
+5000083	2008-06-01 21:36:29	1274005
+5000083	2008-06-01 21:36:29	1273651
+5000083	2008-06-01 21:36:29	1273756
+5000084	2008-06-01 21:37:24	1274734
+5000085	2008-06-01 21:49:55	1274712
+5000085	2008-06-01 21:49:55	1273872
+5000086	2008-06-01 22:07:46	1274594
+5000086	2008-06-01 22:07:46	1274469
+5000086	2008-06-01 22:07:46	1273647
+5000086	2008-06-01 22:07:46	1273858
+5000087	2008-06-01 22:39:42	1274498
+5000087	2008-06-01 22:39:42	1273985
+5000088	2008-06-01 22:56:31	1273983
+5000088	2008-06-01 22:56:31	1274348
+5000088	2008-06-01 22:56:31	1274259
+5000089	2008-06-01 23:14:17	1274156
+5000090	2008-06-01 23:29:40	1273652
+5000090	2008-06-01 23:29:40	1273865
+5000090	2008-06-01 23:29:40	1273851
+5000091	2008-06-01 23:41:12	1274518
+5000091	2008-06-01 23:41:12	1274490
+5000092	2008-06-02 00:02:58	1274348
+5000093	2008-06-02 00:09:34	1274051
+5000093	2008-06-02 00:09:34	1273652
+5000094	2008-06-02 00:34:03	1274462
+5000094	2008-06-02 00:34:03	1273682
+5000094	2008-06-02 00:34:03	1274451
+5000095	2008-06-02 00:42:35	1274136
+5000095	2008-06-02 00:42:35	1273772
+5000096	2008-06-02 01:05:41	1274514
+5000097	2008-06-02 01:13:45	1274500
+5000097	2008-06-02 01:13:45	1273872
+5000098	2008-06-02 01:18:34	1274240
+5000098	2008-06-02 01:18:34	1273747
+5000099	2008-06-02 01:33:39	1274634
+5000099	2008-06-02 01:33:39	1273738
+5000100	2008-06-02 01:45:26	1274125
+5000100	2008-06-02 01:45:26	1273979
+5000101	2008-06-02 01:51:56	1274350
+Time taken: 22.916 seconds, Fetched: 211 row(s)
+
+
+O podemos guardarla en una vista:
+
+hive> create view order_info as select o.order_id, order_date, p.prod_id from orders o join order_details p on (o.order_id = p.order_id);
+OK
+Time taken: 0.166 seconds
+
+hive> describe order_info;
+OK
+order_id            	int                 	                    
+order_date          	timestamp           	                    
+prod_id             	int                 	                    
+Time taken: 0.067 seconds, Fetched: 3 row(s)
+
+hive> describe formatted order_info;
+OK
+# col_name            	data_type           	comment             
+	 	 
+order_id            	int                 	                    
+order_date          	timestamp           	                    
+prod_id             	int                 	                    
+	 	 
+# Detailed Table Information	 	 
+Database:           	default             	 
+Owner:              	cloudera            	 
+CreateTime:         	Mon Sep 12 11:11:31 PDT 2016	 
+LastAccessTime:     	UNKNOWN             	 
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+Table Type:         	VIRTUAL_VIEW        	 
+Table Parameters:	 	 
+	transient_lastDdlTime	1473703891          
+	 	 
+# Storage Information	 	 
+SerDe Library:      	null                	 
+InputFormat:        	org.apache.hadoop.mapred.SequenceFileInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+	 	 
+# View Information	 	 
+View Original Text: 	select o.order_id, order_date, p.prod_id from orders o join order_details p on (o.order_id = p.order_id)	 
+View Expanded Text: 	select `o`.`order_id`, `o`.`order_date`, `p`.`prod_id` from `default`.`orders` `o` join `default`.`order_details` `p` on (`o`.`order_id` = `p`.`order_id`)	 
+Time taken: 0.058 seconds, Fetched: 29 row(s)
+
+
+OJO Ya cambian las columnas, ya no es o.order_id sino simplemente order_id para el where:
+
+hive> select * from order_info where order_id <= 5000101;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Stage-1 is selected by condition resolver.
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0039, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0039/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0039
+Hadoop job information for Stage-1: number of mappers: 2; number of reducers: 1
+2016-09-12 11:14:21,589 Stage-1 map = 0%,  reduce = 0%
+2016-09-12 11:14:29,033 Stage-1 map = 50%,  reduce = 0%, Cumulative CPU 2.72 sec
+2016-09-12 11:14:30,071 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.45 sec
+2016-09-12 11:14:35,269 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.1 sec
+MapReduce Total cumulative CPU time: 7 seconds 100 msec
+Ended Job = job_1473156829873_0039
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 2  Reduce: 1   Cumulative CPU: 7.1 sec   HDFS Read: 57594287 HDFS Write: 7596 SUCCESS
+Total MapReduce CPU Time Spent: 7 seconds 100 msec
+OK
+5000001	2008-06-01 00:03:35	1273719
+5000001	2008-06-01 00:03:35	1273767
+5000001	2008-06-01 00:03:35	1273779
+5000002	2008-06-01 00:27:42	1274124
+5000002	2008-06-01 00:27:42	1273737
+5000002	2008-06-01 00:27:42	1274227
+5000003	2008-06-01 00:49:37	1274473
+5000003	2008-06-01 00:49:37	1273673
+5000004	2008-06-01 01:05:28	1274216
+5000004	2008-06-01 01:05:28	1273748
+5000005	2008-06-01 01:08:36	1274348
+5000005	2008-06-01 01:08:36	1273719
+5000006	2008-06-01 01:11:09	1274190
+5000006	2008-06-01 01:11:09	1274200
+5000007	2008-06-01 01:36:35	1274157
+5000008	2008-06-01 01:36:52	1274168
+5000008	2008-06-01 01:36:52	1274164
+5000009	2008-06-01 01:49:46	1274322
+5000009	2008-06-01 01:49:46	1274265
+5000010	2008-06-01 03:07:14	1274225
+5000011	2008-06-01 03:20:59	1273650
+5000011	2008-06-01 03:20:59	1273742
+5000011	2008-06-01 03:20:59	1274741
+5000012	2008-06-01 04:26:43	1274606
+5000013	2008-06-01 04:55:30	1274371
+5000014	2008-06-01 05:33:52	1274686
+5000014	2008-06-01 05:33:52	1273863
+5000014	2008-06-01 05:33:52	1273653
+5000015	2008-06-01 05:50:54	1273744
+5000015	2008-06-01 05:50:54	1273766
+5000016	2008-06-01 06:47:02	1274048
+5000016	2008-06-01 06:47:02	1273982
+5000017	2008-06-01 07:07:25	1274637
+5000017	2008-06-01 07:07:25	1273977
+5000018	2008-06-01 07:11:47	1274501
+5000019	2008-06-01 07:14:53	1273896
+5000019	2008-06-01 07:14:53	1273746
+5000020	2008-06-01 07:21:52	1274644
+5000020	2008-06-01 07:21:52	1273674
+5000021	2008-06-01 08:42:10	1274746
+5000021	2008-06-01 08:42:10	1273804
+5000021	2008-06-01 08:42:10	1273743
+5000022	2008-06-01 09:21:50	1274639
+5000023	2008-06-01 09:33:23	1274620
+5000024	2008-06-01 10:50:52	1274348
+5000024	2008-06-01 10:50:52	1273770
+5000025	2008-06-01 10:57:34	1274155
+5000025	2008-06-01 10:57:34	1274125
+5000025	2008-06-01 10:57:34	1273856
+5000026	2008-06-01 11:19:58	1274279
+5000026	2008-06-01 11:19:58	1273762
+5000027	2008-06-01 11:27:32	1274361
+5000028	2008-06-01 11:52:34	1274350
+5000029	2008-06-01 12:13:10	1274739
+5000029	2008-06-01 12:13:10	1273666
+5000029	2008-06-01 12:13:10	1273739
+5000030	2008-06-01 12:21:09	1274082
+5000030	2008-06-01 12:21:09	1273738
+5000031	2008-06-01 12:33:56	1274603
+5000031	2008-06-01 12:33:56	1273652
+5000031	2008-06-01 12:33:56	1273977
+5000032	2008-06-01 12:55:18	1274239
+5000033	2008-06-01 13:16:12	1273932
+5000034	2008-06-01 13:27:31	1274713
+5000035	2008-06-01 13:37:03	1273851
+5000035	2008-06-01 13:37:03	1273697
+5000036	2008-06-01 13:48:48	1274495
+5000037	2008-06-01 14:04:32	1273658
+5000037	2008-06-01 14:04:32	1273983
+5000038	2008-06-01 14:30:53	1273910
+5000039	2008-06-01 14:33:19	1274300
+5000039	2008-06-01 14:33:19	1273659
+5000039	2008-06-01 14:33:19	1273983
+5000039	2008-06-01 14:33:19	1273851
+5000040	2008-06-01 14:57:55	1274277
+5000040	2008-06-01 14:57:55	1274154
+5000041	2008-06-01 15:08:03	1273662
+5000041	2008-06-01 15:08:03	1273744
+5000041	2008-06-01 15:08:03	1273916
+5000041	2008-06-01 15:08:03	1274180
+5000041	2008-06-01 15:08:03	1273988
+5000042	2008-06-01 15:19:09	1274468
+5000043	2008-06-01 15:27:40	1274463
+5000043	2008-06-01 15:27:40	1273658
+5000043	2008-06-01 15:27:40	1273983
+5000044	2008-06-01 15:51:21	1274348
+5000045	2008-06-01 16:01:17	1274496
+5000045	2008-06-01 16:01:17	1274614
+5000046	2008-06-01 16:08:39	1274047
+5000046	2008-06-01 16:08:39	1273758
+5000047	2008-06-01 16:28:07	1273747
+5000047	2008-06-01 16:28:07	1273851
+5000047	2008-06-01 16:28:07	1273772
+5000048	2008-06-01 16:40:55	1274107
+5000048	2008-06-01 16:40:55	1273755
+5000049	2008-06-01 16:42:22	1274166
+5000049	2008-06-01 16:42:22	1273855
+5000050	2008-06-01 16:44:53	1274299
+5000050	2008-06-01 16:44:53	1273863
+5000051	2008-06-01 17:14:29	1274070
+5000051	2008-06-01 17:14:29	1273977
+5000052	2008-06-01 17:30:28	1274490
+5000052	2008-06-01 17:30:28	1274091
+5000053	2008-06-01 17:45:13	1273911
+5000053	2008-06-01 17:45:13	1273852
+5000053	2008-06-01 17:45:13	1274686
+5000054	2008-06-01 17:57:32	1274638
+5000054	2008-06-01 17:57:32	1274359
+5000055	2008-06-01 18:08:13	1274168
+5000055	2008-06-01 18:08:13	1273736
+5000056	2008-06-01 18:11:56	1273769
+5000056	2008-06-01 18:11:56	1274143
+5000056	2008-06-01 18:11:56	1273656
+5000056	2008-06-01 18:11:56	1273658
+5000057	2008-06-01 18:15:30	1274092
+5000057	2008-06-01 18:15:30	1273650
+5000058	2008-06-01 18:19:09	1274157
+5000058	2008-06-01 18:19:09	1274497
+5000058	2008-06-01 18:19:09	1273865
+5000059	2008-06-01 18:44:53	1274165
+5000059	2008-06-01 18:44:53	1273675
+5000060	2008-06-01 18:50:26	1274468
+5000060	2008-06-01 18:50:26	1274038
+5000061	2008-06-01 19:19:24	1274195
+5000061	2008-06-01 19:19:24	1274154
+5000062	2008-06-01 19:27:36	1274265
+5000062	2008-06-01 19:27:36	1273653
+5000062	2008-06-01 19:27:36	1273768
+5000063	2008-06-01 19:27:48	1274100
+5000063	2008-06-01 19:27:48	1274195
+5000064	2008-06-01 19:56:52	1274024
+5000065	2008-06-01 19:56:58	1274723
+5000066	2008-06-01 19:58:28	1273842
+5000066	2008-06-01 19:58:28	1273874
+5000067	2008-06-01 20:04:11	1273763
+5000067	2008-06-01 20:04:11	1274002
+5000067	2008-06-01 20:04:11	1274472
+5000068	2008-06-01 20:05:42	1274489
+5000068	2008-06-01 20:05:42	1273740
+5000068	2008-06-01 20:05:42	1273862
+5000069	2008-06-01 20:07:38	1274634
+5000069	2008-06-01 20:07:38	1274234
+5000069	2008-06-01 20:07:38	1274536
+5000070	2008-06-01 20:11:16	1274270
+5000071	2008-06-01 20:12:54	1273671
+5000071	2008-06-01 20:12:54	1274158
+5000071	2008-06-01 20:12:54	1274002
+5000072	2008-06-01 20:27:58	1274325
+5000072	2008-06-01 20:27:58	1274183
+5000073	2008-06-01 20:33:19	1274640
+5000074	2008-06-01 20:41:08	1273702
+5000074	2008-06-01 20:41:08	1273858
+5000075	2008-06-01 20:43:50	1274348
+5000075	2008-06-01 20:43:50	1273648
+5000075	2008-06-01 20:43:50	1273984
+5000075	2008-06-01 20:43:50	1274686
+5000076	2008-06-01 20:46:49	1274243
+5000076	2008-06-01 20:46:49	1274011
+5000077	2008-06-01 20:47:22	1274103
+5000078	2008-06-01 20:48:23	1274172
+5000079	2008-06-01 20:50:32	1274643
+5000079	2008-06-01 20:50:32	1273743
+5000079	2008-06-01 20:50:32	1273866
+5000080	2008-06-01 21:25:50	1273702
+5000080	2008-06-01 21:25:50	1273871
+5000080	2008-06-01 21:25:50	1273751
+5000080	2008-06-01 21:25:50	1274131
+5000080	2008-06-01 21:25:50	1273978
+5000081	2008-06-01 21:35:06	1273942
+5000081	2008-06-01 21:35:06	1274477
+5000082	2008-06-01 21:36:25	1274529
+5000083	2008-06-01 21:36:29	1274274
+5000083	2008-06-01 21:36:29	1274005
+5000083	2008-06-01 21:36:29	1273651
+5000083	2008-06-01 21:36:29	1273756
+5000084	2008-06-01 21:37:24	1274734
+5000085	2008-06-01 21:49:55	1274712
+5000085	2008-06-01 21:49:55	1273872
+5000086	2008-06-01 22:07:46	1274594
+5000086	2008-06-01 22:07:46	1274469
+5000086	2008-06-01 22:07:46	1273647
+5000086	2008-06-01 22:07:46	1273858
+5000087	2008-06-01 22:39:42	1274498
+5000087	2008-06-01 22:39:42	1273985
+5000088	2008-06-01 22:56:31	1273983
+5000088	2008-06-01 22:56:31	1274348
+5000088	2008-06-01 22:56:31	1274259
+5000089	2008-06-01 23:14:17	1274156
+5000090	2008-06-01 23:29:40	1273652
+5000090	2008-06-01 23:29:40	1273865
+5000090	2008-06-01 23:29:40	1273851
+5000091	2008-06-01 23:41:12	1274518
+5000091	2008-06-01 23:41:12	1274490
+5000092	2008-06-02 00:02:58	1274348
+5000093	2008-06-02 00:09:34	1274051
+5000093	2008-06-02 00:09:34	1273652
+5000094	2008-06-02 00:34:03	1274462
+5000094	2008-06-02 00:34:03	1273682
+5000094	2008-06-02 00:34:03	1274451
+5000095	2008-06-02 00:42:35	1274136
+5000095	2008-06-02 00:42:35	1273772
+5000096	2008-06-02 01:05:41	1274514
+5000097	2008-06-02 01:13:45	1274500
+5000097	2008-06-02 01:13:45	1273872
+5000098	2008-06-02 01:18:34	1274240
+5000098	2008-06-02 01:18:34	1273747
+5000099	2008-06-02 01:33:39	1274634
+5000099	2008-06-02 01:33:39	1273738
+5000100	2008-06-02 01:45:26	1274125
+5000100	2008-06-02 01:45:26	1273979
+5000101	2008-06-02 01:51:56	1274350
+Time taken: 20.596 seconds, Fetched: 211 row(s)
+
+
+Podemos borrar la vista:
+
+hive> drop view order_info;
+OK
+Time taken: 0.075 seconds
+hive> select * from order_info where order_id <= 5000101;
+FAILED: SemanticException [Error 10001]: Line 1:14 Table not found 'order_info'
+
+
+l) ACCEDER AL METASTORE DE HIVE:
+[cloudera@quickstart ~]$ mysql -u root -pcloudera
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12113
+Server version: 5.1.73 Source distribution
+
+Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| cm                 |
+| firehose           |
+| hue                |
+| metastore          |
+| movielens          |
+| mysql              |
+| nav                |
+| navms              |
+| oozie              |
+| retail_db          |
+| rman               |
+| sentry             |
++--------------------+
+13 rows in set (0.00 sec)
+
+mysql> use metastore;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++---------------------------+
+| Tables_in_metastore       |
++---------------------------+
+| BUCKETING_COLS            |
+| CDS                       |
+| COLUMNS_V2                |
+| COMPACTION_QUEUE          |
+| COMPLETED_TXN_COMPONENTS  |
+| DATABASE_PARAMS           |
+| DBS                       |
+| DB_PRIVS                  |
+| DELEGATION_TOKENS         |
+| FUNCS                     |
+| FUNC_RU                   |
+| GLOBAL_PRIVS              |
+| HIVE_LOCKS                |
+| IDXS                      |
+| INDEX_PARAMS              |
+| MASTER_KEYS               |
+| NEXT_COMPACTION_QUEUE_ID  |
+| NEXT_LOCK_ID              |
+| NEXT_TXN_ID               |
+| NUCLEUS_TABLES            |
+| PARTITIONS                |
+| PARTITION_EVENTS          |
+| PARTITION_KEYS            |
+| PARTITION_KEY_VALS        |
+| PARTITION_PARAMS          |
+| PART_COL_PRIVS            |
+| PART_COL_STATS            |
+| PART_PRIVS                |
+| ROLES                     |
+| ROLE_MAP                  |
+| SDS                       |
+| SD_PARAMS                 |
+| SEQUENCE_TABLE            |
+| SERDES                    |
+| SERDE_PARAMS              |
+| SKEWED_COL_NAMES          |
+| SKEWED_COL_VALUE_LOC_MAP  |
+| SKEWED_STRING_LIST        |
+| SKEWED_STRING_LIST_VALUES |
+| SKEWED_VALUES             |
+| SORT_COLS                 |
+| TABLE_PARAMS              |
+| TAB_COL_STATS             |
+| TBLS                      |
+| TBL_COL_PRIVS             |
+| TBL_PRIVS                 |
+| TXNS                      |
+| TXN_COMPONENTS            |
+| TYPES                     |
+| TYPE_FIELDS               |
+| VERSION                   |
++---------------------------+
+51 rows in set (0.00 sec)
+
+mysql> select * from DBS;
++-------+-----------------------+---------------------------------------------------------------------+--------------+------------+------------+
+| DB_ID | DESC                  | DB_LOCATION_URI                                                     | NAME         | OWNER_NAME | OWNER_TYPE |
++-------+-----------------------+---------------------------------------------------------------------+--------------+------------+------------+
+|     1 | Default Hive database | hdfs://quickstart.cloudera:8020/user/hive/warehouse                 | default      | public     | ROLE       |
+|     6 | NULL                  | hdfs://quickstart.cloudera:8020/user/hive/warehouse/mbitdatabase.db | mbitdatabase | cloudera   | USER       |
+|    13 | NULL                  | hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db   | db_pruebas   | cloudera   | USER       |
++-------+-----------------------+---------------------------------------------------------------------+--------------+------------+------------+
+3 rows in set (0.00 sec)
+
+mysql> select * from TBLS;
++--------+-------------+-------+------------------+----------+-----------+-------+----------------+----------------+--------------------+--------------------+----------------+
+| TBL_ID | CREATE_TIME | DB_ID | LAST_ACCESS_TIME | OWNER    | RETENTION | SD_ID | TBL_NAME       | TBL_TYPE       | VIEW_EXPANDED_TEXT | VIEW_ORIGINAL_TEXT | LINK_TARGET_ID |
++--------+-------------+-------+------------------+----------+-----------+-------+----------------+----------------+--------------------+--------------------+----------------+
+|      1 |  1463222514 |     1 |                0 | cloudera |         0 |     1 | departamentos  | MANAGED_TABLE  | NULL               | NULL               |           NULL |
+|      6 |  1463769411 |     6 |                0 | cloudera |         0 |     6 | customers      | MANAGED_TABLE  | NULL               | NULL               |           NULL |
+|      8 |  1463769822 |     1 |                0 | cloudera |         0 |     8 | customers      | MANAGED_TABLE  | NULL               | NULL               |           NULL |
+|      9 |  1463770611 |     1 |                0 | cloudera |         0 |     9 | order_details  | MANAGED_TABLE  | NULL               | NULL               |           NULL |
+|     14 |  1463956337 |     1 |                0 | cloudera |         0 |    14 | orders         | EXTERNAL_TABLE | NULL               | NULL               |           NULL |
+|     39 |  1473679544 |    13 |                0 | cloudera |         0 |    39 | prueba_orders  | MANAGED_TABLE  | NULL               | NULL               |           NULL |
+|     40 |  1473679664 |    13 |                0 | cloudera |         0 |    40 | prueba_orders3 | MANAGED_TABLE  | NULL               | NULL               |           NULL |
+|     41 |  1473679666 |    13 |                0 | cloudera |         0 |    41 | prueba_orders2 | MANAGED_TABLE  | NULL               | NULL               |           NULL |
+|     43 |  1473682682 |    13 |                0 | cloudera |         0 |    43 | part_orders    | MANAGED_TABLE  | NULL               | NULL               |           NULL |
++--------+-------------+-------+------------------+----------+-----------+-------+----------------+----------------+--------------------+--------------------+----------------+
+9 rows in set (0.00 sec)
+
+
+m) FUNCIONES:
+1. Utilizar funciones predefinidas:
+
+
+Podemos revisar todas las funciones predefinidas y ver la definicion de las mismas:
+
+hive> show functions;
+OK
+!
+!=
+%
+&
+*
++
+-
+/
+<
+<=
+<=>
+<>
+=
+==
+>
+>=
+^
+abs
+acos
+add_months
+and
+array
+array_contains
+ascii
+asin
+assert_true
+atan
+avg
+base64
+between
+bin
+case
+cbrt
+ceil
+ceiling
+coalesce
+collect_list
+collect_set
+compute_stats
+concat
+concat_ws
+context_ngrams
+conv
+corr
+cos
+count
+covar_pop
+covar_samp
+create_union
+cume_dist
+current_database
+current_date
+current_timestamp
+current_user
+date_add
+date_sub
+datediff
+day
+dayofmonth
+decode
+degrees
+dense_rank
+div
+e
+elt
+encode
+ewah_bitmap
+ewah_bitmap_and
+ewah_bitmap_empty
+ewah_bitmap_or
+exp
+explode
+field
+find_in_set
+first_value
+floor
+format_number
+from_unixtime
+from_utc_timestamp
+get_json_object
+greatest
+hash
+hex
+histogram_numeric
+hour
+if
+in
+in_file
+index
+initcap
+inline
+instr
+isnotnull
+isnull
+java_method
+json_tuple
+lag
+last_day
+last_value
+lcase
+lead
+least
+length
+levenshtein
+like
+ln
+locate
+log
+log10
+log2
+lower
+lpad
+ltrim
+map
+map_keys
+map_values
+matchpath
+max
+min
+minute
+month
+named_struct
+negative
+next_day
+ngrams
+noop
+noopstreaming
+noopwithmap
+noopwithmapstreaming
+not
+ntile
+nvl
+or
+parse_url
+parse_url_tuple
+percent_rank
+percentile
+percentile_approx
+pi
+pmod
+posexplode
+positive
+pow
+power
+printf
+radians
+rand
+rank
+reflect
+reflect2
+regexp
+regexp_extract
+regexp_replace
+repeat
+reverse
+rlike
+round
+row_number
+rpad
+rtrim
+second
+sentences
+sign
+sin
+size
+sort_array
+soundex
+space
+split
+sqrt
+stack
+std
+stddev
+stddev_pop
+stddev_samp
+str_to_map
+struct
+substr
+substring
+sum
+tan
+to_date
+to_unix_timestamp
+to_utc_timestamp
+translate
+trim
+trunc
+ucase
+unbase64
+unhex
+unix_timestamp
+upper
+var_pop
+var_samp
+variance
+weekofyear
+when
+windowingtablefunction
+xpath
+xpath_boolean
+xpath_double
+xpath_float
+xpath_int
+xpath_long
+xpath_number
+xpath_short
+xpath_string
+year
+|
+~
+Time taken: 0.054 seconds, Fetched: 210 row(s)
+hive> describe function year;
+OK
+year(date) - Returns the year of date
+Time taken: 0.038 seconds, Fetched: 1 row(s)
+hive> describe function date;
+OK
+CAST(<Date string> as DATE) - Returns the date represented by the date string.
+Time taken: 0.037 seconds, Fetched: 1 row(s)
+hive> describe function to_date;
+OK
+to_date(expr) - Extracts the date part of the date or datetime expression expr
+Time taken: 0.036 seconds, Fetched: 1 row(s)
+
+
+Y la podemos utilizar en consultas:
+
+-- Longitud del nombre de los departamentos y la media
+hive> select id,length(nombre) from departamentos;
+OK
+2	7
+3	8
+4	7
+5	4
+6	8
+7	8
+Time taken: 0.054 seconds, Fetched: 6 row(s)
+hive> select avg(length(nombre)) from departamentos;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0046, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0046/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0046
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-13 09:52:26,233 Stage-1 map = 0%,  reduce = 0%
+2016-09-13 09:52:31,401 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.51 sec
+2016-09-13 09:52:37,595 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.14 sec
+MapReduce Total cumulative CPU time: 3 seconds 140 msec
+Ended Job = job_1473156829873_0046
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.14 sec   HDFS Read: 7702 HDFS Write: 4 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 140 msec
+OK
+7.0
+Time taken: 18.008 seconds, Fetched: 1 row(s)
+
+
+-- Numero de dias de diferencia entre la primera y la ultima compra
+
+hive> select DATEDIFF(MAX(order_date),MIN(order_date)) from orders;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0048, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0048/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0048
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-13 10:03:16,895 Stage-1 map = 0%,  reduce = 0%
+2016-09-13 10:03:25,151 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.27 sec
+2016-09-13 10:03:31,389 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.18 sec
+MapReduce Total cumulative CPU time: 6 seconds 180 msec
+Ended Job = job_1473156829873_0048
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.18 sec   HDFS Read: 31603769 HDFS Write: 5 SUCCESS
+Total MapReduce CPU Time Spent: 6 seconds 180 msec
+OK
+1345
+Time taken: 21.166 seconds, Fetched: 1 row(s)
+
+
+-- Numero de compras por año
+hive> select count(*) AS num_pedidos, YEAR(TO_DATE(order_date)) AS annio from orders group by YEAR(TO_DATE(order_date)) order by num_pedidos DESC;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 2
+Launching Job 1 out of 2
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0044, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0044/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0044
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-13 09:44:45,317 Stage-1 map = 0%,  reduce = 0%
+2016-09-13 09:44:55,629 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 7.42 sec
+2016-09-13 09:45:01,848 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 8.8 sec
+MapReduce Total cumulative CPU time: 8 seconds 800 msec
+Ended Job = job_1473156829873_0044
+Launching Job 2 out of 2
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0045, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0045/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0045
+Hadoop job information for Stage-2: number of mappers: 1; number of reducers: 1
+2016-09-13 09:45:08,470 Stage-2 map = 0%,  reduce = 0%
+2016-09-13 09:45:13,622 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 0.95 sec
+2016-09-13 09:45:19,834 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 2.57 sec
+MapReduce Total cumulative CPU time: 2 seconds 570 msec
+Ended Job = job_1473156829873_0045
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 8.8 sec   HDFS Read: 31603384 HDFS Write: 214 SUCCESS
+Stage-Stage-2: Map: 1  Reduce: 1   Cumulative CPU: 2.57 sec   HDFS Read: 4636 HDFS Write: 58 SUCCESS
+Total MapReduce CPU Time Spent: 11 seconds 370 msec
+OK
+389923	2011
+251170	2010
+103957	2009
+59718	2012
+26708	2008
+Time taken: 41.236 seconds, Fetched: 5 row(s)
+
+
+-- Concatenacion de los datos de clientes
+hive> select concat (lname,',',fname,' - ',street,' ',city,',',state,'.CP:',zipcode) from customers limit 10;
+OK
+Shepard,Quentin - 32092 West 10th Street Prairie City,SD.CP:57649
+Louis,Brandon - 1311 North 2nd Street Clearfield,IA.CP:50840
+Ham,Marilyn - 25831 North 25th Street Concord,CA.CP:94522
+Tee,Mister - 11596 West 1st Street Sterling,KS.CP:67579
+Beeswax,Nunya - 3044 West 21st Street Phoenix,AZ.CP:85017
+Eller,Michael - 24326 West 11th Street Germantown,IL.CP:62245
+Franks,Gerard - 356 Turner Street Pioneer,CA.CP:95666
+Carson,Deborah - 4033 East 21st Street Arbon,ID.CP:83212
+Brush,Thomas - 20643 North 12th Street Poland,ME.CP:04274
+Simpsonite,Bartman - 1748 East Fairbanks Road Alto Pass,IL.CP:62905
+Time taken: 0.054 seconds, Fetched: 10 row(s)
+
+
+
+2. Funciones definidas
+
+2.1. Creamos proyecto con maven.
+2.2. Vamos a necesitar importar la clase: org.apache.hadoop.hive.ql.exec.UDF por lo tanto buscamos la version de hive instalada:
+
+[cloudera@quickstart lib]$ hive -v
+2016-09-13 10:08:26,016 WARN  [main] mapreduce.TableMapReduceUtil: The hbase-prefix-tree module jar containing PrefixTreeCodec is not present.  Continuing without it.
+
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+ADD JAR /usr/lib/hive/lib/hive-contrib.jar
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+hive> exit;
+WARN: The method class org.apache.commons.logging.impl.SLF4JLogFactory#release() was invoked.
+WARN: Please see http://www.slf4j.org/codes.html#release for an explanation.
+[cloudera@quickstart lib]$ hive --version
+2016-09-13 10:10:02,245 WARN  [main] mapreduce.TableMapReduceUtil: The hbase-prefix-tree module jar containing PrefixTreeCodec is not present.  Continuing without it.
+Hive 1.1.0-cdh5.7.0
+Subversion file:///data/jenkins/workspace/generic-package-rhel64-6-0/topdir/BUILD/hive-1.1.0-cdh5.7.0 -r Unknown
+Compiled by jenkins on Wed Mar 23 11:32:08 PDT 2016
+From source with checksum 4240d2b8cd46c5c53b4ee593a3cccfc5
+
+
+2.3. La version es la 1.1.0-cdh5.7.0. La buscamos en internet para saber lo que nos tenemos que bajar de pom.xml:
+hive-exec - 1.1.0-cdh5.7.0
+
+Por lo tanto la incluimos por maven en el proyecto:
+...
+<hive-version>1.1.0-cdh5.7.0</hive-version>
+...
+...
+<dependency>
+	<groupId>org.apache.hive</groupId>
+	<artifactId>hive-exec</artifactId>
+	<version>${hive-version}</version>
+</dependency> 
+...
+
+2.4. Desarroyamos nuestra UDF: Lower.java
+package com.mbit.creacionUDF;
+
+import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.io.Text;
+
+public final class Lower extends UDF {
+  public Text evaluate(final Text s) {
+    if (s == null) {
+      return null;
+    }
+    return new Text(s.toString().toLowerCase());
+  }
+}
+
+2.5. Generamos el jar con maven.-- Se incluye proyecto y jar adjunto al documento.
+2.6. Lo incluimos como funcion.
+
+hive> list jars;
+/usr/lib/hive/lib/hive-contrib.jar
+
+hive> add jar /home/cloudera/training_hive-0.0.1-SNAPSHOT.jar;
+Added [/home/cloudera/training_hive-0.0.1-SNAPSHOT.jar] to class path
+Added resources: [/home/cloudera/training_hive-0.0.1-SNAPSHOT.jar]
+
+hive> list jars;
+/usr/lib/hive/lib/hive-contrib.jar
+/home/cloudera/training_hive-0.0.1-SNAPSHOT.jar
+
+2.7. Creamos nuestra funcion:
+
+hive> create function my_lower as 'com.mbit.creacionUDF.Lower';
+OK
+Time taken: 0.106 seconds
+
+2.8. La utilizamos en alguna consulta:
+hive> select my_lower(city) from customers limit 10;
+OK
+prairie city
+clearfield
+concord
+sterling
+phoenix
+germantown
+pioneer
+arbon
+poland
+alto pass
+Time taken: 0.061 seconds, Fetched: 10 row(s)
+
+Mismo resultado que si utilizamos el lower normal:
+hive> select lower(city) from customers limit 10;
+OK
+prairie city
+clearfield
+concord
+sterling
+phoenix
+germantown
+pioneer
+arbon
+poland
+alto pass
+Time taken: 0.045 seconds, Fetched: 10 row(s)
+
+3. Hacemos una UDF mas complicada, trabajando con tipos TimeStamp y tipos Date. Crearemos una funcion Year para recoger el año de un tipo texto con formato yyyy-MM-dd, de un tipo Date y de un tipo timestamp.
+Tambien crearemos un JUnit para probar los 3 metodos evaluate (todo esta incluido en el proyecto):
+
+Year.java
+...
+...
+public IntWritable evaluate(Text dateString) {
+
+    if (dateString == null) {
+      return null;
+    }
+
+    try {
+      Date date = formatter.parse(dateString.toString());
+      calendar.setTime(date);
+      result.set(calendar.get(Calendar.YEAR));
+      return result;
+    } catch (ParseException e) {
+      return null;
+    }
+  }
+
+  public IntWritable evaluate(DateWritable d) {
+    if (d == null) {
+      return null;
+    }
+
+    calendar.setTime(d.get()); 
+    result.set(calendar.get(Calendar.YEAR));
+    return result;
+  }
+
+  public IntWritable evaluate(TimestampWritable t) {
+    if (t == null) {
+      return null;
+    }
+
+    calendar.setTime(t.getTimestamp());
+    result.set(calendar.get(Calendar.YEAR));
+    return result;
+  }
+...
+...
+
+TestYear.java
+...
+...
+@Test
+  public void testUDFYearTimestamp() throws Exception {
+    // Running example
+    // Friday 30th August 1985 02:47:02 AM
+    final TimestampWritable t =
+        new TimestampWritable(new Timestamp(494218022082L));
+
+    Year g;
+    g = new Year();
+    IntWritable i1 = g.evaluate(t);
+    assertEquals(1985, i1.get());
+
+  }
+
+  @Test
+  public void testUDFYearDate() throws Exception {
+    // Running example
+    // Dia Actual
+    final java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+    final DateWritable d = new DateWritable(date);
+
+
+    Year g;
+    g = new Year();
+    IntWritable i1 = g.evaluate(d);
+    assertEquals(2016, i1.get());
+
+  }
+
+  @Test
+  public void testUDFYearText() throws Exception {
+    // Running example
+    // 2005-07-30
+    final Text t = new Text("2005-07-30");
+
+    Year g;
+    g = new Year();
+    IntWritable i1 = g.evaluate(t);
+    assertEquals(2005, i1.get());
+
+  }
+...
+...
+
+Luego tendremos que hacer lo mismo de antes, generar jar de nuevo, importarlo de nuevo al classpath de HIVE y crear la funcion.
+
+hive> describe orders;
+OK
+order_id            	int                 	                    
+cust_id             	int                 	                    
+order_date          	timestamp           	                    
+Time taken: 0.059 seconds, Fetched: 3 row(s)
+
+hive> list jars;
+/usr/lib/hive/lib/hive-contrib.jar
+/home/cloudera/training_hive-0.0.1-SNAPSHOT.jar
+
+hive> add jar /home/cloudera/training_hive-0.0.1-SNAPSHOT.jar;
+Added [/home/cloudera/training_hive-0.0.1-SNAPSHOT.jar] to class path
+Added resources: [/home/cloudera/training_hive-0.0.1-SNAPSHOT.jar]
+
+hive> list jars;
+/usr/lib/hive/lib/hive-contrib.jar
+/home/cloudera/training_hive-0.0.1-SNAPSHOT.jar
+
+hive> create function my_year as 'com.mbit.creacionUDF.Year';
+OK
+Time taken: 0.027 seconds
+
+hive> select order_id, my_Year(order_date) from orders limit 10;
+OK
+5000001	2008
+5000002	2008
+5000003	2008
+5000004	2008
+5000005	2008
+5000006	2008
+5000007	2008
+5000008	2008
+5000009	2008
+5000010	2008
+Time taken: 0.061 seconds, Fetched: 10 row(s)
+
+
+IMP: Cuando creas una UDF y la cargas a no ser que se lo indiques db.my_Year te la crea en el db que estes utilizando.
+
+
+n) COPIAS Y TRANSFORMACIONES DE TABLA:
+Al margen de meter un registro nuevo o borrarlo de una tabla el INSERT/SELECT te permite hacer transformaciones y filtrados de datos a gran escala.
+
+1. Insercion con creacion nueva
+
+Si la tabla no esta creada, no funciona obviamente:
+
+hive> insert overwrite table orders_filtrado select * from prueba_orders where my_Year(order_date)== '2008'; 
+FAILED: SemanticException [Error 10001]: Line 1:23 Table not found 'orders_filtrado'
+
+
+Por lo tanto primero creamos la tabla y luego insertamos:
+
+hive> create table orders_filtrado like prueba_orders;
+OK
+Time taken: 0.08 seconds
+
+hive> insert overwrite table orders_filtrado select * from prueba_orders where default.my_Year(order_date)== '2008'; 
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0049, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0049/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0049
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2016-09-14 01:49:21,480 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 01:49:27,707 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.28 sec
+MapReduce Total cumulative CPU time: 2 seconds 280 msec
+Ended Job = job_1473156829873_0049
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/orders_filtrado/.hive-staging_hive_2016-09-14_01-49-14_835_3852370385848226317-1/-ext-10000
+Loading data to table db_pruebas.orders_filtrado
+Table db_pruebas.orders_filtrado stats: [numFiles=1, numRows=100, totalSize=3600, rawDataSize=3500]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 2.28 sec   HDFS Read: 7465 HDFS Write: 3685 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 280 msec
+OK
+Time taken: 14.246 seconds
+
+
+hive> select * from orders_filtrado where default.my_Year(order_date)!='2008';
+OK
+Time taken: 0.089 seconds
+
+
+hive> select count(*) from orders_filtrado where default.my_Year(order_date)=='2008';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0050, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0050/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0050
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 01:51:29,274 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 01:51:35,465 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.64 sec
+2016-09-14 01:51:40,651 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.26 sec
+MapReduce Total cumulative CPU time: 3 seconds 260 msec
+Ended Job = job_1473156829873_0050
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.26 sec   HDFS Read: 11245 HDFS Write: 4 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 260 msec
+OK
+100
+Time taken: 18.075 seconds, Fetched: 1 row(s)
+hive> select * from orders_filtrado where default.my_Year(order_date)=='2008';
+OK
+5000100	1181081	2008-06-02 01:45:26
+5000099	1007621	2008-06-02 01:33:39
+5000098	1162453	2008-06-02 01:18:34
+5000097	1081686	2008-06-02 01:13:45
+5000096	1036233	2008-06-02 01:05:41
+5000095	1087468	2008-06-02 00:42:35
+5000094	1184531	2008-06-02 00:34:03
+5000093	1139100	2008-06-02 00:09:34
+...
+5000001	1133938	2008-06-01 00:03:35
+Time taken: 0.05 seconds, Fetched: 100 row(s)
+
+
+Hemos pasado 100 registros (del 2008) a la tabla orders_filtrado. Esto se podia tambien haber hecho con un CREATE TABLE ... AS SELECT...
+
+
+2. Insercion de nuevos registros en tabla ya creada:
+
+Si no utilizamos OVERWRITE, podemos añadir a la tabla y no se borra nada:
+
+hive> select count(*) from default.orders where default.my_Year(order_date)=='2012';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0054, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0054/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0054
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:03:36,403 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:03:44,752 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.44 sec
+2016-09-14 02:03:50,960 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.09 sec
+MapReduce Total cumulative CPU time: 7 seconds 90 msec
+Ended Job = job_1473156829873_0054
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 7.09 sec   HDFS Read: 31603675 HDFS Write: 6 SUCCESS
+Total MapReduce CPU Time Spent: 7 seconds 90 msec
+OK
+59718
+Time taken: 21.211 seconds, Fetched: 1 row(s)
+
+
+hive> insert into table orders_filtrado select * from default.orders where default.my_Year(order_date)=='2012';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0055, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0055/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0055
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2016-09-14 02:05:23,129 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:05:31,399 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 6.35 sec
+MapReduce Total cumulative CPU time: 6 seconds 350 msec
+Ended Job = job_1473156829873_0055
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/orders_filtrado/.hive-staging_hive_2016-09-14_02-05-16_534_6620838479554917751-1/-ext-10000
+Loading data to table db_pruebas.orders_filtrado
+Table db_pruebas.orders_filtrado stats: [numFiles=2, numRows=59818, totalSize=2153448, rawDataSize=2093630]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 6.35 sec   HDFS Read: 31599987 HDFS Write: 2149938 SUCCESS
+Total MapReduce CPU Time Spent: 6 seconds 350 msec
+OK
+Time taken: 16.235 seconds
+
+
+hive> select count(*) from orders_filtrado where default.my_Year(order_date)=='2012';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0056, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0056/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0056
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:06:08,425 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:06:14,634 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 3.16 sec
+2016-09-14 02:06:20,843 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.74 sec
+MapReduce Total cumulative CPU time: 4 seconds 740 msec
+Ended Job = job_1473156829873_0056
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 4.74 sec   HDFS Read: 2161213 HDFS Write: 6 SUCCESS
+Total MapReduce CPU Time Spent: 4 seconds 740 msec
+OK
+59718
+Time taken: 19.072 seconds, Fetched: 1 row(s)
+
+
+hive> select count(*) from orders_filtrado;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0057, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0057/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0057
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:06:35,871 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:06:41,036 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.54 sec
+2016-09-14 02:06:47,247 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.13 sec
+MapReduce Total cumulative CPU time: 3 seconds 130 msec
+Ended Job = job_1473156829873_0057
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.13 sec   HDFS Read: 2160217 HDFS Write: 6 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 130 msec
+OK
+59818
+Time taken: 18.023 seconds, Fetched: 1 row(s)
+
+Hemos incluido en orders_filtrado los 59718 del año 2012, y siguen estando los 100 del 2008.
+
+
+o) PARTICIONES (2a parte)
+
+En vez de descargar y cargar el archivo manualmente, podemos hacer un INSERT/SELECT directamente en las particiones.
+Como ya teniamos datos vamos a utilizar el OVERWRITE. 
+Miramos primero que particiones teniamos:
+
+hive> show partitions part_orders;
+OK
+year=2008/month=04
+year=2008/month=05
+year=2008/month=06
+Time taken: 0.118 seconds, Fetched: 3 row(s)
+
+
+Como tenemos varias particiones vamos a hacer un multiple insert:
+
+hive> from default.orders
+    > insert overwrite table part_orders partition(year=2008, month=04) select order_id, cust_id  where year(order_date) = '2008' and month(order_date) = '04'
+    > insert overwrite table part_orders partition(year=2008, month=05) select order_id, cust_id  where year(order_date) = '2008' and month(order_date) = '05'
+    > insert overwrite table part_orders partition(year=2008, month=06) select order_id, cust_id  where year(order_date) = '2008' and month(order_date) = '06';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 7
+Launching Job 1 out of 7
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0058, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0058/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0058
+Hadoop job information for Stage-3: number of mappers: 1; number of reducers: 0
+2016-09-14 02:26:04,259 Stage-3 map = 0%,  reduce = 0%
+2016-09-14 02:26:13,542 Stage-3 map = 100%,  reduce = 0%, Cumulative CPU 6.27 sec
+MapReduce Total cumulative CPU time: 6 seconds 270 msec
+Ended Job = job_1473156829873_0058
+Stage-6 is selected by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Stage-7 is filtered out by condition resolver.
+Stage-12 is selected by condition resolver.
+Stage-11 is filtered out by condition resolver.
+Stage-13 is filtered out by condition resolver.
+Stage-18 is selected by condition resolver.
+Stage-17 is filtered out by condition resolver.
+Stage-19 is filtered out by condition resolver.
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=04/.hive-staging_hive_2016-09-14_02-25-58_250_8720968851303162047-1/-ext-10000
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=05/.hive-staging_hive_2016-09-14_02-25-58_250_8720968851303162047-1/-ext-10002
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=06/.hive-staging_hive_2016-09-14_02-25-58_250_8720968851303162047-1/-ext-10004
+Loading data to table db_pruebas.part_orders partition (year=2008, month=04)
+Loading data to table db_pruebas.part_orders partition (year=2008, month=05)
+Loading data to table db_pruebas.part_orders partition (year=2008, month=06)
+Partition db_pruebas.part_orders{year=2008, month=04} stats: [numFiles=1, numRows=0, totalSize=0, rawDataSize=0]
+Partition db_pruebas.part_orders{year=2008, month=05} stats: [numFiles=1, numRows=0, totalSize=0, rawDataSize=0]
+Partition db_pruebas.part_orders{year=2008, month=06} stats: [numFiles=1, numRows=0, totalSize=58592, rawDataSize=0]
+MapReduce Jobs Launched: 
+Stage-Stage-3: Map: 1   Cumulative CPU: 6.27 sec   HDFS Read: 31602394 HDFS Write: 58828 SUCCESS
+Total MapReduce CPU Time Spent: 6 seconds 270 msec
+OK
+Time taken: 18.097 seconds
+
+
+Como podemos ver no se ha copiado nada de los meses 04 y 05, sin embargo si del 06. Revisamos la tabla de orders haber si se ha copiado de forma correcta:
+
+
+hive> select count(*) from default.orders where year(order_date) = '2008' and month(order_date) = '04';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0060, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0060/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0060
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:29:56,630 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:30:05,018 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.03 sec
+2016-09-14 02:30:11,220 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.64 sec
+MapReduce Total cumulative CPU time: 6 seconds 640 msec
+Ended Job = job_1473156829873_0060
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.64 sec   HDFS Read: 31604032 HDFS Write: 2 SUCCESS
+Total MapReduce CPU Time Spent: 6 seconds 640 msec
+OK
+0
+Time taken: 21.215 seconds, Fetched: 1 row(s)
+
+
+hive> select count(*) from default.orders where year(order_date) = '2008' and month(order_date) = '05';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0061, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0061/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0061
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:30:38,082 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:30:46,325 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.06 sec
+2016-09-14 02:30:52,527 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.72 sec
+MapReduce Total cumulative CPU time: 6 seconds 720 msec
+Ended Job = job_1473156829873_0061
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.72 sec   HDFS Read: 31604032 HDFS Write: 2 SUCCESS
+Total MapReduce CPU Time Spent: 6 seconds 720 msec
+OK
+0
+Time taken: 21.095 seconds, Fetched: 1 row(s)
+
+
+hive> select count(*) from default.orders where year(order_date) = '2008' and month(order_date) = '06';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0062, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0062/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0062
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:31:06,230 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:31:14,484 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.14 sec
+2016-09-14 02:31:20,686 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.8 sec
+MapReduce Total cumulative CPU time: 6 seconds 800 msec
+Ended Job = job_1473156829873_0062
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.8 sec   HDFS Read: 31604028 HDFS Write: 5 SUCCESS
+Total MapReduce CPU Time Spent: 6 seconds 800 msec
+OK
+3662
+Time taken: 21.125 seconds, Fetched: 1 row(s)
+
+
+hive> select count(*) from part_orders where year = '2008' and month = '06';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0063, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0063/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0063
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:32:36,483 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:32:41,643 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.21 sec
+2016-09-14 02:32:46,820 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 2.71 sec
+MapReduce Total cumulative CPU time: 2 seconds 710 msec
+Ended Job = job_1473156829873_0063
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 2.71 sec   HDFS Read: 65619 HDFS Write: 5 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 710 msec
+OK
+3662
+Time taken: 19.198 seconds, Fetched: 1 row(s)
+
+
+Y vemos que si, los meses 04 y 05 no tienen nada en orders. Buscamos otro mes para cargar otra particion:
+
+
+hive> select count(*) AS numero, year(order_date) AS anio, month(order_date) AS mes from default.orders where anio = '2008' and mes != '06' group by year(order_date),month(order_date);
+FAILED: SemanticException [Error 10004]: Line 1:104 Invalid table alias or column reference 'anio': (possible column names are: order_id, cust_id, order_date)
+hive> select count(*) AS numero, year(order_date) AS anio, month(order_date) AS mes from default.orders where year(order_date) = '2008' and month(order_date) != '06' group by year(order_date),month(order_date);
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0064, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0064/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0064
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 02:40:55,695 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:41:03,983 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.27 sec
+2016-09-14 02:41:10,176 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.89 sec
+MapReduce Total cumulative CPU time: 6 seconds 890 msec
+Ended Job = job_1473156829873_0064
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.89 sec   HDFS Read: 31604825 HDFS Write: 75 SUCCESS
+Total MapReduce CPU Time Spent: 6 seconds 890 msec
+OK
+3953	2008	7
+3855	2008	8
+3739	2008	9
+3927	2008	10
+3764	2008	11
+3808	2008	12
+Time taken: 21.12 seconds, Fetched: 6 row(s)
+
+
+Cogemos por ejemplo el mes 07 y lo incluimos como una nueva particion:
+
+hive> insert overwrite table part_orders partition(year=2008, month=07) select order_id, cust_id from default.orders where year(order_date) = '2008' and month(order_date) = '07';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0065, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0065/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0065
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2016-09-14 02:46:31,030 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 02:46:40,326 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.49 sec
+MapReduce Total cumulative CPU time: 5 seconds 490 msec
+Ended Job = job_1473156829873_0065
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://quickstart.cloudera:8020/user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=07/.hive-staging_hive_2016-09-14_02-46-25_348_6701304381841482307-1/-ext-10000
+Loading data to table db_pruebas.part_orders partition (year=2008, month=07)
+Partition db_pruebas.part_orders{year=2008, month=07} stats: [numFiles=1, numRows=3953, totalSize=63248, rawDataSize=59295]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 5.49 sec   HDFS Read: 31600126 HDFS Write: 63350 SUCCESS
+Total MapReduce CPU Time Spent: 5 seconds 490 msec
+OK
+Time taken: 16.422 seconds
+
+
+Revisamos que se ha creado una nueva particion:
+
+hive> show partitions part_orders;
+OK
+year=2008/month=04
+year=2008/month=05
+year=2008/month=06
+year=2008/month=07
+Time taken: 0.044 seconds, Fetched: 4 row(s)
+
+
+[cloudera@quickstart lib]$ hadoop fs -ls -R /user/hive/warehouse/db*.db/part*
+drwxrwxrwx   - cloudera supergroup          0 2016-09-14 02:46 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008
+drwxrwxrwx   - cloudera supergroup          0 2016-09-14 02:26 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=04
+-rwxrwxrwx   1 cloudera supergroup          0 2016-09-14 02:26 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=04/000000_0
+drwxrwxrwx   - cloudera supergroup          0 2016-09-14 02:26 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=05
+-rwxrwxrwx   1 cloudera supergroup          0 2016-09-14 02:26 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=05/000000_0
+drwxrwxrwx   - cloudera supergroup          0 2016-09-14 02:26 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=06
+-rwxrwxrwx   1 cloudera supergroup      58592 2016-09-14 02:26 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=06/000000_0
+drwxrwxrwx   - cloudera supergroup          0 2016-09-14 02:46 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=07
+-rwxrwxrwx   1 cloudera supergroup      63248 2016-09-14 02:46 /user/hive/warehouse/db_pruebas.db/part_orders/year=2008/month=07/000000_0
+
+
+Y vemos realmente que se han copiado datos correctamnete.
+
+p) SERIALIZACION-DESERIALIZACION:
+Vamos a coger un archivo de trazas de apache y lo vamos a cargar en una tabla, teniendo en cuenta que el separador no es unico y por eso utilizamos un SerDeRegex.
+Se adjunta el archivo common_access_log.txt
+
+1. Creamos la tabla con su serdeproperties:
+
+hive> CREATE TABLE apache_common_log (
+    >   host STRING,
+    >   identity STRING,
+    >   user STRING,
+    >   time STRING,
+    >   request STRING,
+    >   status STRING,
+    >   size STRING
+    >   )
+    > ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+    > WITH SERDEPROPERTIES (
+    >   "input.regex" = "([^ ]*) ([^ ]*) ([^ ]*) (-|\\[[^\\]]*\\]) ([^ \"]*|\"[^\"]*\") (-|[0-9]*) (-|[0-9]*)",
+    >   "output.format.string" = "%1$s %2$s %3$s %4$s %5$s %6$s %7$s"
+    > )
+    > STORED AS TEXTFILE;
+OK
+Time taken: 0.151 seconds
+
+hive> show tables;
+OK
+apache_common_log
+orders_filtrado
+part_orders
+prueba_orders
+prueba_orders2
+prueba_orders3
+Time taken: 0.014 seconds, Fetched: 6 row(s)
+
+hive> describe apache_common_log;
+OK
+host                	string              	                    
+identity            	string              	                    
+user                	string              	                    
+time                	string              	                    
+request             	string              	                    
+status              	string              	                    
+size                	string              	                    
+Time taken: 0.066 seconds, Fetched: 7 row(s)
+
+hive> select * from apache_common_log;
+OK
+Time taken: 0.051 seconds
+
+2. Cargamos desde local el archivo de trazas:
+
+hive> LOAD DATA LOCAL INPATH "/home/cloudera/Desktop/common_access_log.txt" INTO TABLE apache_common_log;
+Loading data to table db_pruebas.apache_common_log
+Table db_pruebas.apache_common_log stats: [numFiles=1, totalSize=174449]
+OK
+Time taken: 0.279 seconds
+
+
+3. Hacemos una consulta de los 5 primeros registros en tiempo:
+
+hive> SELECT * FROM apache_common_log ORDER BY time LIMIT 5;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0066, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0066/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0066
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 04:12:28,440 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 04:12:34,635 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.49 sec
+2016-09-14 04:12:39,815 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 1.49 sec
+MapReduce Total cumulative CPU time: 1 seconds 490 msec
+Ended Job = job_1473156829873_0066
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.13 sec   HDFS Read: 182109 HDFS Write: 587 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 130 msec
+OK
+64.242.88.10	-	-	[07/Mar/2014:16:05:49 -0800]	"GET /twiki/bin/edit/Main/Double_bounce_sender?topicparent=Main.ConfigurationVariables HTTP/1.1"	401	12846
+64.242.88.10	-	-	[07/Mar/2014:16:06:51 -0800]	"GET /twiki/bin/rdiff/TWiki/NewUserTemplate?rev1=1.3&rev2=1.2 HTTP/1.1"	200	4523
+64.242.88.10	-	-	[07/Mar/2014:16:10:02 -0800]	"GET /mailman/listinfo/hsdivision HTTP/1.1"	200	6291
+64.242.88.10	-	-	[07/Mar/2014:16:11:58 -0800]	"GET /twiki/bin/view/TWiki/WikiSyntax HTTP/1.1"	200	7352
+64.242.88.10	-	-	[07/Mar/2014:16:20:55 -0800]	"GET /twiki/bin/view/Main/DCCAndPostFix HTTP/1.1"	200	5253
+Time taken: 19.109 seconds, Fetched: 5 row(s)
+
+
+Podemos observar que el user y la identity son '-'. Y las peticiones que mas han tardado.
+
+Miramos el numero de peticiones por usurio:
+
+hive> SELECT user, count(1) FROM apache_common_log where user!='' or user!=NULL group by user;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0068, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0068/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0068
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 04:17:35,698 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 04:17:41,887 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.59 sec
+2016-09-14 04:17:47,084 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.24 sec
+MapReduce Total cumulative CPU time: 3 seconds 240 msec
+Ended Job = job_1473156829873_0068
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.24 sec   HDFS Read: 182272 HDFS Write: 7 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 240 msec
+OK
+-	1546
+Time taken: 18.332 seconds, Fetched: 1 row(s)
+
+
+
+Miramos el numero de peticiones no correctas:
+
+hive> SELECT count(1) FROM apache_common_log where status!='200';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0069, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0069/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0069
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 04:20:59,515 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 04:21:05,728 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.58 sec
+2016-09-14 04:21:10,927 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.2 sec
+MapReduce Total cumulative CPU time: 3 seconds 200 msec
+Ended Job = job_1473156829873_0069
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.2 sec   HDFS Read: 182311 HDFS Write: 4 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 200 msec
+OK
+272
+Time taken: 18.144 seconds, Fetched: 1 row(s)
+
+
+272 peticiones no correctas.
+
+q) TRANSFORMACIONES:
+Las transformaciones sirven para aplicarle un comando o serie de comandos a una columna, grupo de columnas o expresion de columnas de un tabla.
+Y poder guardarlo en otra o simplemente visualizarlo.
+El comando puede ser un comando simple de linux/unix o puede ser tambien un script de python.
+
+1. Transformacion con comandos:
+
+Nos basamos en un fichero de albumnes de jazz lo cargamos en una tabla nueva:
+
+cool_cat_offerings.txt:
+Coltrane|John|Crescent
+Shorter|Wayne|Alegria
+Coltrane|John|First Meditations (for Quartet)
+Davis|Miles|The Sorcerer
+Coltrane|John|My Favorite Things
+Davis|Miles|Miles Smiles
+Coltrane|John|A Love Supreme
+...
+...
+
+
+hive> CREATE EXTERNAL TABLE cool_cat_offerings (
+    >     last_name   STRING,
+    >     first_name  STRING,
+    >     album       STRING)
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
+    > STORED AS TEXTFILE;
+OK
+Time taken: 0.103 seconds
+
+hive> show tables;
+OK
+apache_common_log
+cool_cat_offerings
+orders_filtrado
+part_orders
+prueba_orders
+prueba_orders2
+prueba_orders3
+Time taken: 0.015 seconds, Fetched: 7 row(s)
+
+hive> LOAD DATA LOCAL INPATH "/home/cloudera/Desktop/cool_cat_offerings.txt" INTO TABLE cool_cat_offerings;
+Loading data to table db_pruebas.cool_cat_offerings
+Table db_pruebas.cool_cat_offerings stats: [numFiles=1, totalSize=820]
+OK
+Time taken: 0.281 seconds
+
+hive> select * from cool_cat_offerings limit 10;
+OK
+Coltrane	John	Crescent
+Shorter	Wayne	Alegria
+Coltrane	John	First Meditations (for Quartet)
+Davis	Miles	The Sorcerer
+Coltrane	John	My Favorite Things
+Davis	Miles	Miles Smiles
+Coltrane	John	A Love Supreme
+Davis	Miles	E.S.P.
+Rollins	Sonny	On Impulse!
+Davis	Miles	Relaxin' with the Miles Davis Quintet
+Time taken: 0.047 seconds, Fetched: 10 row(s)
+
+
+Ahora aplicamos una transformacion a los datos:
+tr -s <conjunto albumnes> \n, va a separar en palabras cada album:
+
+hive> SELECT TRANSFORM(album)
+    >     USING 'tr -s [:blank:] \n'
+    >     AS (word STRING)
+    > FROM cool_cat_offerings;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0070, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0070/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0070
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2016-09-14 05:45:17,052 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 05:45:22,222 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.43 sec
+MapReduce Total cumulative CPU time: 1 seconds 430 msec
+Ended Job = job_1473156829873_0070
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 1.43 sec   HDFS Read: 4339 HDFS Write: 452 SUCCESS
+Total MapReduce CPU Time Spent: 1 seconds 430 msec
+OK
+Crescent
+Alegria
+First
+Meditations
+(for
+Quartet)
+The
+Sorcerer
+My
+Favorite
+Things
+Miles
+Smiles
+A
+Love
+Supreme
+E.S.P.
+On
+Impulse!
+Relaxin'
+with
+the
+Miles
+Davis
+Quintet
+Way
+out
+West
+Walkin'
+with
+the
+Miles
+Davis
+Quintet
+Juju
+Bitches
+Brew
+Night
+Dreamer
+Seven
+Steps
+to
+Heaven
+Four
+and
+More
+Ascension
+Kind
+of
+Blue
+Saxophone
+Colossus
+Lush
+Life
+Sketches
+of
+Spain
+Blue
+Trane
+The
+Bridge
+Adam's
+Apple
+Cookin'
+with
+the
+Miles
+Davis
+Quintet
+Footprints
+Live
+Nefertiti
+Time taken: 12.871 seconds, Fetched: 72 row(s)
+
+
+OBS: No tenemos reducer porque lo unico que se ha hecho es una operacione de mapeo. 
+
+Se puede aplicar una clausula antes de la transformacion:
+
+hive> SELECT TRANSFORM(album)
+    >     USING 'tr -s [:blank:] \n'
+    >     AS (word STRING)
+    > FROM cool_cat_offerings
+    > WHERE last_name = 'Coltrane'
+    >     AND first_name = 'John';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0071, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0071/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0071
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2016-09-14 05:51:00,680 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 05:51:05,912 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.9 sec
+MapReduce Total cumulative CPU time: 1 seconds 900 msec
+Ended Job = job_1473156829873_0071
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 1.9 sec   HDFS Read: 4857 HDFS Write: 106 SUCCESS
+Total MapReduce CPU Time Spent: 1 seconds 900 msec
+OK
+Crescent
+First
+Meditations
+(for
+Quartet)
+My
+Favorite
+Things
+A
+Love
+Supreme
+Ascension
+Lush
+Life
+Blue
+Trane
+Time taken: 12.876 seconds, Fetched: 16 row(s)
+
+
+Pero solo podemos utilizar la columna word si utilizamos una subquery:
+
+hive> SELECT TRANSFORM(album)
+    >     USING 'tr -s [:blank:] \n'
+    >     AS (word STRING)
+    > FROM cool_cat_offerings
+    > WHERE last_name = 'Coltrane'
+    >     AND first_name = 'John'
+    >     AND word NOT RLIKE '[()]';
+FAILED: SemanticException [Error 10004]: Line 7:8 Invalid table alias or column reference 'word': (possible column names are: last_name, first_name, album)
+
+
+hive> SELECT t.*
+    > FROM (
+    >     SELECT TRANSFORM(album)
+    >         USING 'tr -s [:blank:] \n'
+    >         AS (word STRING)
+    >     FROM cool_cat_offerings
+    >     WHERE last_name = 'Coltrane'
+    >         AND first_name = 'John'
+    > ) t
+    > WHERE t.word NOT RLIKE '[()]';
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0072, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0072/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0072
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2016-09-14 05:53:52,273 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 05:53:57,543 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.8 sec
+MapReduce Total cumulative CPU time: 1 seconds 800 msec
+Ended Job = job_1473156829873_0072
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 1.8 sec   HDFS Read: 5140 HDFS Write: 92 SUCCESS
+Total MapReduce CPU Time Spent: 1 seconds 800 msec
+OK
+Crescent
+First
+Meditations
+My
+Favorite
+Things
+A
+Love
+Supreme
+Ascension
+Lush
+Life
+Blue
+Trane
+Time taken: 11.937 seconds, Fetched: 14 row(s)
+
+Con el RLIKE podemos quitar las palabras que contengan (,),[,]
+
+
+2. Transformacion con Python
+
+2.1. Si tenemos un transformacion mas complicada se puede hacer con un script de python:
+
+album_word_splitter.py
+
+import sys
+import re
+
+DELIMITER = '\t'
+SPLITTER = re.compile('\s+')
+
+for line in sys.stdin:
+    line = line.rstrip('\n')
+    album_start = line.rfind(DELIMITER)
+    album = line if album_start < 0 else line[album_start + 1:]
+    if album:
+        for word in SPLITTER.split(album):
+            print DELIMITER.join((line, word))
+
+sys.exit(0)
+
+2.2. Basicamente lo que hace el script es que de la linea de entrada separata por \n. Coge el campo empezando por la derecha que le separa del resto de \t.
+Y de ahi saca el album de la linea. Luego lo va separando en palabras con la funcion split.
+Por ultimo junta el trozo de linea junto con las palabras separadas por \s y lo imprime. Es decir imprime cada album tantas veces como palabras tenga junto a cada palabra. 
+OJO: Es necesario imprimirlo y separado por un delimitador.
+
+P.Ejemplo:
+Coltrane\tJohn\tMy Favorite Things\n
+Davis\tMiles\tMiles Smiles\n
+
+Seria:
+Coltrane\tJohn\tMy Favorite Things\tMy\s
+Coltrane\tJohn\tMy Favorite Things\tFavorite\s
+Coltrane\tJohn\tMy Favorite Things\tThings\n
+Davis\tMiles\tMiles Smiles\tMiles\s
+Davis\tMiles\tMiles Smiles\tSmiles\n
+
+
+2.3. Desues lo añadimos a hive
+
+hive> add file /home/cloudera/Desktop/album_word_splitter.py;
+Added resources: [/home/cloudera/Desktop/album_word_splitter.py]
+hive> list files;
+/home/cloudera/Desktop/album_word_splitter.py
+
+IMPORTANTE: EN EL CASO DE LOS RECURSOS ES DIFERENTE A LOS .JAR, SE CREA UN VINCULO SOBRE LOS RECURSOS Y POR LO TANTO NO SE PUEDEN ELIMINAR (en este caso si se elimina /home/cloudera/Desktop/album_word_splitter.py no se puede lanzar el proceso)
+
+
+2.4. Ya lo podemos utilizar. Lanzamos la transformacion:
+
+hive> SELECT TRANSFORM(last_name, first_name, album)
+    >     USING 'python album_word_splitter.py'
+    >     AS (last_name STRING, first_name STRING, album STRING, word STRING)
+    > FROM cool_cat_offerings;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1473156829873_0073, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0073/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0073
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2016-09-14 08:50:43,089 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 08:50:50,344 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.59 sec
+MapReduce Total cumulative CPU time: 1 seconds 590 msec
+Ended Job = job_1473156829873_0073
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 1.59 sec   HDFS Read: 4640 HDFS Write: 2885 SUCCESS
+Total MapReduce CPU Time Spent: 1 seconds 590 msec
+OK
+Coltrane	John	Crescent	Crescent
+Shorter	Wayne	Alegria	Alegria
+Coltrane	John	First Meditations (for Quartet)	First
+Coltrane	John	First Meditations (for Quartet)	Meditations
+Coltrane	John	First Meditations (for Quartet)	(for
+Coltrane	John	First Meditations (for Quartet)	Quartet)
+Davis	Miles	The Sorcerer	The
+Davis	Miles	The Sorcerer	Sorcerer
+Coltrane	John	My Favorite Things	My
+Coltrane	John	My Favorite Things	Favorite
+Coltrane	John	My Favorite Things	Things
+Davis	Miles	Miles Smiles	Miles
+Davis	Miles	Miles Smiles	Smiles
+Coltrane	John	A Love Supreme	A
+Coltrane	John	A Love Supreme	Love
+Coltrane	John	A Love Supreme	Supreme
+Davis	Miles	E.S.P.	E.S.P.
+Rollins	Sonny	On Impulse!	On
+Rollins	Sonny	On Impulse!	Impulse!
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Relaxin'
+Davis	Miles	Relaxin' with the Miles Davis Quintet	with
+Davis	Miles	Relaxin' with the Miles Davis Quintet	the
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Miles
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Davis
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Quintet
+Rollins	Sonny	Way out West	Way
+Rollins	Sonny	Way out West	out
+Rollins	Sonny	Way out West	West
+Davis	Miles	Walkin' with the Miles Davis Quintet	Walkin'
+Davis	Miles	Walkin' with the Miles Davis Quintet	with
+Davis	Miles	Walkin' with the Miles Davis Quintet	the
+Davis	Miles	Walkin' with the Miles Davis Quintet	Miles
+Davis	Miles	Walkin' with the Miles Davis Quintet	Davis
+Davis	Miles	Walkin' with the Miles Davis Quintet	Quintet
+Shorter	Wayne	Juju	Juju
+Davis	Miles	Bitches Brew	Bitches
+Davis	Miles	Bitches Brew	Brew
+Shorter	Wayne	Night Dreamer	Night
+Shorter	Wayne	Night Dreamer	Dreamer
+Davis	Miles	Seven Steps to Heaven	Seven
+Davis	Miles	Seven Steps to Heaven	Steps
+Davis	Miles	Seven Steps to Heaven	to
+Davis	Miles	Seven Steps to Heaven	Heaven
+Davis	Miles	Four and More	Four
+Davis	Miles	Four and More	and
+Davis	Miles	Four and More	More
+Coltrane	John	Ascension	Ascension
+Davis	Miles	Kind of Blue	Kind
+Davis	Miles	Kind of Blue	of
+Davis	Miles	Kind of Blue	Blue
+Rollins	Sonny	Saxophone Colossus	Saxophone
+Rollins	Sonny	Saxophone Colossus	Colossus
+Coltrane	John	Lush Life	Lush
+Coltrane	John	Lush Life	Life
+Davis	Miles	Sketches of Spain	Sketches
+Davis	Miles	Sketches of Spain	of
+Davis	Miles	Sketches of Spain	Spain
+Coltrane	John	Blue Trane	Blue
+Coltrane	John	Blue Trane	Trane
+Rollins	Sonny	The Bridge	The
+Rollins	Sonny	The Bridge	Bridge
+Shorter	Wayne	Adam's Apple	Adam's
+Shorter	Wayne	Adam's Apple	Apple
+Davis	Miles	Cookin' with the Miles Davis Quintet	Cookin'
+Davis	Miles	Cookin' with the Miles Davis Quintet	with
+Davis	Miles	Cookin' with the Miles Davis Quintet	the
+Davis	Miles	Cookin' with the Miles Davis Quintet	Miles
+Davis	Miles	Cookin' with the Miles Davis Quintet	Davis
+Davis	Miles	Cookin' with the Miles Davis Quintet	Quintet
+Shorter	Wayne	Footprints Live	Footprints
+Shorter	Wayne	Footprints Live	Live
+Davis	Miles	Nefertiti	Nefertiti
+Time taken: 19.303 seconds, Fetched: 72 row(s)
+
+Esto si quisieramos lo podriamos insertar en otra tabla con 4 columnas. O insertar solo ciertos campos recuperados. 
+Hasta ahora no hemos activado reducers.
+
+3. Transformacion con reducers:
+3.1. Si queremos reducir la informacion que hemos creado en el paso anterior por ejemplo juntandola de nuevo, podemos hacerla utilizando reducers:
+Con los reducers podriamos:
+	i)Extraer las palabras
+	ii)Agrupar palabras por artista
+	iii)Ordenar las palabras por artista
+	iv)Cruzarlas separadas por espacios
+
+Para ello no utilizamos GROUP BY, sino DISTRIBUTED BY (indica la clave(s) de agrupacion) y SORT BY (indica la clave(s) de ordenacion).
+Por lo tanto nosotros podriamos agrupar por nombre y apellido y ordenar por esos campos:
+
+hive> SELECT TRANSFORM(last_name, first_name, album)
+    >   USING 'python album_word_splitter.py'
+    >   AS (last_name STRING, first_name STRING, album STRING, word STRING)
+    > FROM cool_cat_offerings
+    > DISTRIBUTE BY last_name, first_name
+    > SORT BY last_name, first_name, word;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0078, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0078/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0078
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 09:33:45,805 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 09:33:51,998 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.17 sec
+2016-09-14 09:33:57,157 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 2.7 sec
+MapReduce Total cumulative CPU time: 2 seconds 700 msec
+Ended Job = job_1473156829873_0078
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 2.7 sec   HDFS Read: 8763 HDFS Write: 2885 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 700 msec
+OK
+Coltrane	John	First Meditations (for Quartet)	(for
+Coltrane	John	A Love Supreme	A
+Coltrane	John	Ascension	Ascension
+Coltrane	John	Blue Trane	Blue
+Coltrane	John	Crescent	Crescent
+Coltrane	John	My Favorite Things	Favorite
+Coltrane	John	First Meditations (for Quartet)	First
+Coltrane	John	Lush Life	Life
+Coltrane	John	A Love Supreme	Love
+Coltrane	John	Lush Life	Lush
+Coltrane	John	First Meditations (for Quartet)	Meditations
+Coltrane	John	My Favorite Things	My
+Coltrane	John	First Meditations (for Quartet)	Quartet)
+Coltrane	John	A Love Supreme	Supreme
+Coltrane	John	My Favorite Things	Things
+Coltrane	John	Blue Trane	Trane
+Davis	Miles	Bitches Brew	Bitches
+Davis	Miles	Kind of Blue	Blue
+Davis	Miles	Bitches Brew	Brew
+Davis	Miles	Cookin' with the Miles Davis Quintet	Cookin'
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Davis
+Davis	Miles	Walkin' with the Miles Davis Quintet	Davis
+Davis	Miles	Cookin' with the Miles Davis Quintet	Davis
+Davis	Miles	E.S.P.	E.S.P.
+Davis	Miles	Four and More	Four
+Davis	Miles	Seven Steps to Heaven	Heaven
+Davis	Miles	Kind of Blue	Kind
+Davis	Miles	Miles Smiles	Miles
+Davis	Miles	Cookin' with the Miles Davis Quintet	Miles
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Miles
+Davis	Miles	Walkin' with the Miles Davis Quintet	Miles
+Davis	Miles	Four and More	More
+Davis	Miles	Nefertiti	Nefertiti
+Davis	Miles	Walkin' with the Miles Davis Quintet	Quintet
+Davis	Miles	Cookin' with the Miles Davis Quintet	Quintet
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Quintet
+Davis	Miles	Relaxin' with the Miles Davis Quintet	Relaxin'
+Davis	Miles	Seven Steps to Heaven	Seven
+Davis	Miles	Sketches of Spain	Sketches
+Davis	Miles	Miles Smiles	Smiles
+Davis	Miles	The Sorcerer	Sorcerer
+Davis	Miles	Sketches of Spain	Spain
+Davis	Miles	Seven Steps to Heaven	Steps
+Davis	Miles	The Sorcerer	The
+Davis	Miles	Walkin' with the Miles Davis Quintet	Walkin'
+Davis	Miles	Four and More	and
+Davis	Miles	Kind of Blue	of
+Davis	Miles	Sketches of Spain	of
+Davis	Miles	Cookin' with the Miles Davis Quintet	the
+Davis	Miles	Walkin' with the Miles Davis Quintet	the
+Davis	Miles	Relaxin' with the Miles Davis Quintet	the
+Davis	Miles	Seven Steps to Heaven	to
+Davis	Miles	Relaxin' with the Miles Davis Quintet	with
+Davis	Miles	Walkin' with the Miles Davis Quintet	with
+Davis	Miles	Cookin' with the Miles Davis Quintet	with
+Rollins	Sonny	The Bridge	Bridge
+Rollins	Sonny	Saxophone Colossus	Colossus
+Rollins	Sonny	On Impulse!	Impulse!
+Rollins	Sonny	On Impulse!	On
+Rollins	Sonny	Saxophone Colossus	Saxophone
+Rollins	Sonny	The Bridge	The
+Rollins	Sonny	Way out West	Way
+Rollins	Sonny	Way out West	West
+Rollins	Sonny	Way out West	out
+Shorter	Wayne	Adam's Apple	Adam's
+Shorter	Wayne	Alegria	Alegria
+Shorter	Wayne	Adam's Apple	Apple
+Shorter	Wayne	Night Dreamer	Dreamer
+Shorter	Wayne	Footprints Live	Footprints
+Shorter	Wayne	Juju	Juju
+Shorter	Wayne	Footprints Live	Live
+Shorter	Wayne	Night Dreamer	Night
+Time taken: 18.038 seconds, Fetched: 72 row(s)
+
+OBS: Revisar que ahora si hemos lanzado reducers.
+
+
+
+3.2. Si ahora queremos podemos hacer otra transformacion sobre los elementos devueltos. Como una doble transformacion.
+Añadimos un nuevo .py
+
+hive> add file /home/cloudera/Desktop/artist_word_joiner.py;
+Added resources: [/home/cloudera/Desktop/artist_word_joiner.py]
+
+
+artist_word_joiner.py
+
+import sys
+import itertools
+import operator
+
+DELIMITER = '\t'
+key_value_pairs = (line.rstrip('\n').rsplit(DELIMITER, 1)
+                   for line in sys.stdin)
+
+for key, pairs in itertools.groupby(key_value_pairs, operator.itemgetter(0)):
+    words = ' '.join(pair[1] for pair in pairs)
+    print DELIMITER.join((key, words))
+
+sys.exit(0)
+
+
+3.3. Y lanzamos la doble transformacion:
+
+hive> SELECT TRANSFORM(g.last_name, g.first_name, g.word)
+    >     USING 'python artist_word_joiner.py'
+    >     AS (last_name, first_name, words)
+    > FROM (
+    >   SELECT TRANSFORM(last_name, first_name, album)
+    >     USING 'python album_word_splitter.py'
+    >    AS (last_name STRING, first_name STRING, album STRING, word STRING)
+    >   FROM cool_cat_offerings
+    >   DISTRIBUTE BY last_name, first_name
+    >   SORT BY last_name, first_name, word
+    > ) g;
+Query ID = cloudera_20160912110909_5b8a6460-d8c4-4f71-8132-a77a658cbefd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1473156829873_0079, Tracking URL = http://quickstart.cloudera:8088/proxy/application_1473156829873_0079/
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -kill job_1473156829873_0079
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-09-14 09:45:34,607 Stage-1 map = 0%,  reduce = 0%
+2016-09-14 09:45:39,766 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.15 sec
+2016-09-14 09:45:45,953 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 2.78 sec
+MapReduce Total cumulative CPU time: 2 seconds 780 msec
+Ended Job = job_1473156829873_0079
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 2.78 sec   HDFS Read: 9060 HDFS Write: 506 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 780 msec
+OK
+Coltrane	John	(for A Ascension Blue Crescent Favorite First Life Love Lush Meditations My Quartet) Supreme Things Trane
+Davis	Miles	Bitches Blue Brew Cookin' Davis Davis Davis E.S.P. Four Heaven Kind Miles Miles Miles Miles More Nefertiti Quintet Quintet Quintet Relaxin' Seven Sketches Smiles Sorcerer Spain Steps The Walkin' and of of the the the to with with with
+Rollins	Sonny	Bridge Colossus Impulse! On Saxophone The Way West out
+Shorter	Wayne	Adam's Alegria Apple Dreamer Footprints Juju Live Night
+Time taken: 18.399 seconds, Fetched: 4 row(s)
+
+
+Lo que se ha hecho basicamente es agrupar las palabras por nombre y apellido. Previamente han sido distribuidas y ordenadas en filas por el DISTRIBUTED y el SORT.
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
