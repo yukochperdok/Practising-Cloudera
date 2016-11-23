@@ -1,0 +1,9 @@
+dhclient[32695]: DHCPREQUEST on eth1 to 192.168.52.254 port 67 (xid=0xabbe4ef)
+dhclient[32695]: DHCPACK from 192.168.52.254 (xid=0xabbe4ef)
+NetworkManager[1735]: <info> (eth1): DHCPv4 state changed renew -> renew
+NetworkManager[1735]: <info>   address 192.168.52.138
+NetworkManager[1735]: <info>   prefix 24 (255.255.255.0)
+NetworkManager[1735]: <info>   gateway 192.168.52.2
+NetworkManager[1735]: <info>   nameserver '192.168.52.2'
+NetworkManager[1735]: <info>   domain name 'localdomain'
+dhclient[32695]: bound to 192.168.52.138 -- renewal in 896 seconds.

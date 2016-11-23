@@ -1,0 +1,1812 @@
+--------------------------------------------------------EJERCICIOS AVANZADOS FLUME---------------------------------------------
+
+1. NETCAT y LOGGER
+Usaremos lo siguiente:
+Source:netcat
+Sink:logger
+Channel:memory
+
+
+1.1. Creamos el archivo flumeNetcat.conf:
+
+[cloudera@quickstart conf]$ ls -ltr
+total 28
+-rw-r--r-- 1 root root 1214 Mar 23 11:29 flume-env.sh.template
+-rw-r--r-- 1 root root 1110 Mar 23 11:29 flume-env.ps1.template
+-rw-r--r-- 1 root root 1661 Mar 23 11:29 flume-conf.properties.template
+-rw-r--r-- 1 root root 3118 Mar 23 11:41 log4j.properties
+-rw-r--r-- 1 root root    0 Mar 23 11:41 flume.conf
+-rwxrwxrwx 1 root root 2053 May 21 01:12 flumebit.conf
+-rwxrwxrwx 1 root root 2009 May 21 01:51 flumebitTail.conf
+-rwxr-xr-x 1 root root 1515 Sep 16 03:21 flumeNetcat.conf
+
+
+flumeNetcat.conf:
+# Naming the components on the current agent
+NetcatAgent.sources = Netcat   
+NetcatAgent.channels = MemChannel 
+NetcatAgent.sinks = LoggerSink  
+
+# Describing/Configuring the source 
+NetcatAgent.sources.Netcat.type = netcat 
+NetcatAgent.sources.Netcat.bind = localhost
+NetcatAgent.sources.Netcat.port = 56565  
+
+# Describing/Configuring the sink 
+NetcatAgent.sinks.LoggerSink.type = logger  
+
+# Describing/Configuring the channel 
+NetcatAgent.channels.MemChannel.type = memory 
+NetcatAgent.channels.MemChannel.capacity = 1000 
+NetcatAgent.channels.MemChannel.transactionCapacity = 100 
+ 
+# Bind the source and sink to the channel 
+NetcatAgent.sources.Netcat.channels = MemChannel
+NetcatAgent.sinks.LoggerSink.channel = MemChannel
+
+
+1.2. Ejecutamos flume-ng agent para el agente:NetcatAgent
+
+[cloudera@quickstart Ejercicios_Avanzados]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumeNetcat.conf --name NetcatAgent -Dflume.root.logger=INFO,console
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:<<MUCHAS LIBRERIAS>>
+/usr/lib/hadoop/lib/native:/usr/lib/hbase/bin/../lib/native/Linux-amd64-64 org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumeNetcat.conf --name NetcatAgent
+2016-09-16 03:31:15,773 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-16 03:31:15,780 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumeNetcat.conf
+2016-09-16 03:31:15,785 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: LoggerSink Agent: NetcatAgent
+2016-09-16 03:31:15,786 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:LoggerSink
+2016-09-16 03:31:15,786 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:LoggerSink
+2016-09-16 03:31:15,811 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [NetcatAgent]
+2016-09-16 03:31:15,811 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-16 03:31:15,819 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel MemChannel type memory
+2016-09-16 03:31:15,860 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel MemChannel
+2016-09-16 03:31:15,861 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source Netcat, type netcat
+2016-09-16 03:31:15,886 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: LoggerSink, type: logger
+2016-09-16 03:31:15,889 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel MemChannel connected to [Netcat, LoggerSink]
+2016-09-16 03:31:15,897 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{Netcat=EventDrivenSourceRunner: { source:org.apache.flume.source.NetcatSource{name:Netcat,state:IDLE} }} sinkRunners:{LoggerSink=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@74247cc2 counterGroup:{ name:null counters:{} } }} channels:{MemChannel=org.apache.flume.channel.MemoryChannel{name: MemChannel}} }
+2016-09-16 03:31:15,912 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel MemChannel
+2016-09-16 03:31:15,985 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: MemChannel: Successfully registered new MBean.
+2016-09-16 03:31:15,985 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: MemChannel started
+2016-09-16 03:31:15,988 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink LoggerSink
+2016-09-16 03:31:15,988 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source Netcat
+2016-09-16 03:31:15,989 (lifecycleSupervisor-1-4) [INFO - org.apache.flume.source.NetcatSource.start(NetcatSource.java:155)] Source starting
+2016-09-16 03:31:16,002 (lifecycleSupervisor-1-4) [INFO - org.apache.flume.source.NetcatSource.start(NetcatSource.java:169)] Created serverSocket:sun.nio.ch.ServerSocketChannelImpl[/127.0.0.1:56565]
+
+
+1.3 Dejamos el puerto abierto y abriendo otra consola mandamos mensajes:
+
+[cloudera@quickstart Ejercicios_Avanzados]$ curl telnet://localhost:56565 
+
+OK
+
+OK
+hello!
+OK
+ahora ya puedo
+OK
+generar
+OK
+eventos
+OK
+y mandarlos
+OK
+
+
+
+1.4. Estos se ven reflejados en salida estandar(donde hemos lanzado flume-ng):
+
+...
+...
+...
+2016-09-16 03:31:16,002 (lifecycleSupervisor-1-4) [INFO - org.apache.flume.source.NetcatSource.start(NetcatSource.java:169)] Created serverSocket:sun.nio.ch.ServerSocketChannelImpl[/127.0.0.1:56565]
+2016-09-16 03:33:46,185 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: }
+2016-09-16 03:33:47,141 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: }
+2016-09-16 03:34:41,177 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 68 65 6C 6C 6F 21                               hello! }
+2016-09-16 03:35:19,190 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 61 68 6F 72 61 20 79 61 20 70 75 65 64 6F       ahora ya puedo }
+2016-09-16 03:35:19,190 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 67 65 6E 65 72 61 72                            generar }
+2016-09-16 03:35:20,175 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 76 65 6E 74 6F 73                            eventos }
+2016-09-16 03:35:24,276 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 79 20 6D 61 6E 64 61 72 6C 6F 73                y mandarlos }
+
+CONCLUSION: Con flume type netcat podemos enviar datos por un puerto y se pueden recoger por parte del sink en otro puerto en otra maquina, dejarlos en un logger o hdfs o hive o hbase... etc...
+
+
+
+2. SYSLOG y LOGGER
+
+Vamos a mandar mensajes con el syslog a un logger. Usaremos lo siguiente:
+Source:syslogtcp
+Sink:logger
+Channel:memory
+
+Lo suyo es tener dos maquinas y enviarlo desde una origen desde syslog a una destino. Nosotros solo tenemos una maquina asique enviaremos los mensajes a localhost:5410.
+
+2.0. Debemos conocer nuestra IP de red y si tenemos instalado algun sistema de syslog:
+a)
+[cloudera@quickstart conf]$ ifconfig
+eth1      Link encap:Ethernet  HWaddr 00:0C:29:A7:D7:AA  
+          inet addr:192.168.52.138  Bcast:192.168.52.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:337915 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:174585 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:363574291 (346.7 MiB)  TX bytes:19643623 (18.7 MiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:126081197 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:126081197 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:13670433581 (12.7 GiB)  TX bytes:13670433581 (12.7 GiB)
+
+Nuestra IP de red es 192.168.52.138
+
+
+b)
+[cloudera@quickstart etc]$ sudo service rsyslog restart
+Shutting down system logger:                               [  OK  ]
+Starting system logger:                                    [  OK  ]
+[cloudera@quickstart etc]$ logger -t test 'Esto es una prueba'
+[cloudera@quickstart etc]$ 
+
+
+Tenemos instalado el rsyslog y su fichero de configuracion estara en /etc/rsyslog.conf:
+
+[cloudera@quickstart etc]$ ls -ltr *rsyslog*
+-rw-r--r--. 1 root root 2875 Dec 10  2014 rsyslog.conf
+
+rsyslog.d:
+total 0
+[cloudera@quickstart etc]$ cat rsyslog.conf
+# rsyslog v5 configuration file
+
+# For more information see /usr/share/doc/rsyslog-*/rsyslog_conf.html
+# If you experience problems, see http://www.rsyslog.com/doc/troubleshoot.html
+
+#### MODULES ####
+
+$ModLoad imuxsock # provides support for local system logging (e.g. via logger command)
+$ModLoad imklog   # provides kernel logging support (previously done by rklogd)
+#$ModLoad immark  # provides --MARK-- message capability
+
+# Provides UDP syslog reception
+#$ModLoad imudp
+#$UDPServerRun 514
+
+# Provides TCP syslog reception
+#$ModLoad imtcp
+#$InputTCPServerRun 514
+
+
+#### GLOBAL DIRECTIVES ####
+
+# Use default timestamp format
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+# File syncing capability is disabled by default. This feature is usually not required,
+# not useful and an extreme performance hit
+#$ActionFileEnableSync on
+
+# Include all config files in /etc/rsyslog.d/
+$IncludeConfig /etc/rsyslog.d/*.conf
+
+
+#### RULES ####
+
+# Log all kernel messages to the console.
+# Logging much else clutters up the screen.
+#kern.*                                                 /dev/console
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+
+# The authpriv file has restricted access.
+authpriv.*                                              /var/log/secure
+
+# Log all the mail messages in one place.
+mail.*                                                  -/var/log/maillog
+
+
+# Log cron stuff
+cron.*                                                  /var/log/cron
+
+# Everybody gets emergency messages
+*.emerg                                                 *
+
+# Save news errors of level crit and higher in a special file.
+uucp,news.crit                                          /var/log/spooler
+
+# Save boot messages also to boot.log
+local7.*                                                /var/log/boot.log
+
+
+# ### begin forwarding rule ###
+# The statement between the begin ... end define a SINGLE forwarding
+# rule. They belong together, do NOT split them. If you create multiple
+# forwarding rules, duplicate the whole block!
+# Remote Logging (we use TCP for reliable delivery)
+#
+# An on-disk queue is created for this action. If the remote host is
+# down, messages are spooled to disk and sent when it is up again.
+#$WorkDirectory /var/lib/rsyslog # where to place spool files
+#$ActionQueueFileName fwdRule1 # unique name prefix for spool files
+#$ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
+#$ActionQueueSaveOnShutdown on # save messages to disk on shutdown
+#$ActionQueueType LinkedList   # run asynchronously
+#$ActionResumeRetryCount -1    # infinite retries if host is down
+# remote host is: name/ip:port, e.g. 192.168.0.1:514, port optional
+#*.* @@remote-host:514
+# ### end of the forwarding rule ###
+[cloudera@quickstart etc]$ 
+
+
+
+
+2.1. Creamos el nuevo fichero de configuracion:
+
+[cloudera@quickstart conf]$ ls -ltr
+total 32
+-rw-r--r-- 1 root root 1214 Mar 23 11:29 flume-env.sh.template
+-rw-r--r-- 1 root root 1110 Mar 23 11:29 flume-env.ps1.template
+-rw-r--r-- 1 root root 1661 Mar 23 11:29 flume-conf.properties.template
+-rw-r--r-- 1 root root 3118 Mar 23 11:41 log4j.properties
+-rw-r--r-- 1 root root    0 Mar 23 11:41 flume.conf
+-rwxrwxrwx 1 root root 2053 May 21 01:12 flumebit.conf
+-rwxrwxrwx 1 root root 2009 May 21 01:51 flumebitTail.conf
+-rwxr-xr-x 1 root root 1515 Sep 16 03:21 flumeNetcat.conf
+-rwxr-xr-x 1 root root 1515 Sep 19 01:29 flumeSyslog.conf
+
+flumeSyslog.conf:
+
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# I'll be using TCP based Syslog source
+a1.sources.r1.type = syslogtcp
+# the port that Flume Syslog source will listen on
+a1.sources.r1.port = 514
+# the hostname that Flume Syslog source will be running on
+a1.sources.r1.host = 192.168.52.138
+
+# Describe the sink
+a1.sinks.k1.type = logger
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+
+
+Le indicaremos que queremos atacar a la maquina 192.168.52.138, puerto TCP (514)
+
+
+2.2 Indicamos visibilidad en el fichero de configuracion de rsyslog:
+...
+...
+...
+# remote host is: name/ip:port, e.g. 192.168.0.1:514, port optional
+#*.* @@remote-host:514
+*.* @@192.168.52.138:514
+# ### end of the forwarding rule ###
+
+Aqui le estamos indicando que *.* (todos los usuarios) tienen visibilidad sobre la maquina:puerto 192.168.52.138:514, el @@ indica que nos estamos refiriendo a un TCP.
+Se podria haber puesto tmbien *.* @@localhost:514 o *.* @@127.0.0.1:514 incluso creo que sin ponerlo al ser una maquina local podria funcionar.
+
+
+2.3. Arrancamos nuestro flume atacando al fichero de configuracion de syslog y con el agente a1:
+
+[cloudera@quickstart etc]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumeSyslog.conf --name a1 -Dflume.root.logger=INFO,console
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:/<<MUCHAS LIBRERIAS>>:/usr/lib/flume-ng/../search/lib/zookeeper.jar' -Djava.library.path=:/usr/lib/hadoop/lib/native:/usr/lib/hadoop/lib/native:/usr/lib/hbase/bin/../lib/native/Linux-amd64-64 org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumeSyslog.conf --name a1
+2016-09-19 01:52:02,889 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-19 01:52:02,906 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumeSyslog.conf
+2016-09-19 01:52:02,922 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: k1 Agent: a1
+2016-09-19 01:52:02,922 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 01:52:02,922 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 01:52:00,231 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [a1]
+2016-09-19 01:52:00,231 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-19 01:52:00,253 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c1 type memory
+2016-09-19 01:52:00,274 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c1
+2016-09-19 01:52:00,278 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source r1, type syslogtcp
+2016-09-19 01:52:00,429 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k1, type: logger
+2016-09-19 01:52:00,437 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c1 connected to [r1, k1]
+2016-09-19 01:52:00,455 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{r1=EventDrivenSourceRunner: { source:org.apache.flume.source.SyslogTcpSource{name:r1,state:IDLE} }} sinkRunners:{k1=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@77dbc064 counterGroup:{ name:null counters:{} } }} channels:{c1=org.apache.flume.channel.MemoryChannel{name: c1}} }
+2016-09-19 01:52:00,481 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c1
+2016-09-19 01:52:00,609 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c1: Successfully registered new MBean.
+2016-09-19 01:52:00,609 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c1 started
+2016-09-19 01:52:00,615 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k1
+2016-09-19 01:52:00,617 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source r1
+2016-09-19 01:52:00,761 (lifecycleSupervisor-1-3) [INFO - org.apache.flume.source.SyslogTcpSource.start(SyslogTcpSource.java:119)] Syslog TCP Source starting...
+
+Ya tenemos el TCP Source Arrancado escuchando en el puerto 514.
+
+
+2.4 Rearancamos el servicio y lanzamos mensajes:
+
+[root@quickstart conf]# service rsyslog restart
+Shutting down system logger:                               [  OK  ]
+Starting system logger:                                    [  OK  ]
+[root@quickstart conf]# logger -t test 'Testeando Syslog'
+[root@quickstart conf]# logger -t test 'Nueva prueba'
+
+
+Y encontramos esto:
+...
+...
+2016-09-19 01:52:00,615 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k1
+2016-09-19 01:52:00,617 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source r1
+2016-09-19 01:52:00,761 (lifecycleSupervisor-1-3) [INFO - org.apache.flume.source.SyslogTcpSource.start(SyslogTcpSource.java:119)] Syslog TCP Source starting...
+2016-09-19 01:55:13,442 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{timestamp=1474275310000, Severity=6, host=quickstart, Facility=0, priority=6} body: 6B 65 72 6E 65 6C 3A 20 69 6D 6B 6C 6F 67 20 35 kernel: imklog 5 }
+2016-09-19 01:55:13,443 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{timestamp=1474275310000, Severity=6, host=quickstart, Facility=5, priority=46} body: 72 73 79 73 6C 6F 67 64 3A 20 5B 6F 72 69 67 69 rsyslogd: [origi }
+2016-09-19 01:55:35,452 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{timestamp=1474275334000, Severity=5, host=quickstart, Facility=1, priority=13} body: 74 65 73 74 3A 20 54 65 73 74 65 61 6E 64 6F 20 test: Testeando  }
+2016-09-19 01:55:57,461 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{timestamp=1474275355000, Severity=5, host=quickstart, Facility=1, priority=13} body: 74 65 73 74 3A 20 4E 75 65 76 61 20 70 72 75 65 test: Nueva prue }
+
+
+Los primeros 2 mensajes son de rearancar el servicio. Despues estan llegando nuestros 2 mensajes. Cortados ya que tiene un tamaño limitado.
+Tambien vemos las cabeceras del evento que se incluyen: timestamp,host.
+
+Esto lo podriamos dejar en un HDFS utimizando las cabeceras para distribuir las carpetas por tiempo:
+
+3. SYSLOG Y HDFS
+Source:netcat
+Sink:hdfs
+Channel:memory
+
+3.1 Creamos un nuevo fichero de configuracion muy parecido al anterior pero le indicaremos con sink hdfs
+
+[root@quickstart conf]# ls -ltr
+total 36
+-rw-r--r-- 1 root root 1214 Mar 23 11:29 flume-env.sh.template
+-rw-r--r-- 1 root root 1110 Mar 23 11:29 flume-env.ps1.template
+-rw-r--r-- 1 root root 1661 Mar 23 11:29 flume-conf.properties.template
+-rw-r--r-- 1 root root 3118 Mar 23 11:41 log4j.properties
+-rw-r--r-- 1 root root    0 Mar 23 11:41 flume.conf
+-rwxrwxrwx 1 root root 2053 May 21 01:12 flumebit.conf
+-rwxrwxrwx 1 root root 2009 May 21 01:51 flumebitTail.conf
+-rwxr-xr-x 1 root root 1515 Sep 16 03:21 flumeNetcat.conf
+-rwxr-xr-x 1 root root 1403 Sep 19 01:39 flumeSyslog.conf
+-rwxr-xr-x 1 root root 1541 Sep 19 02:17 flumeSyslogHDFS.conf
+
+
+flumeSyslogHDFS.conf:
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# I'll be using TCP based Syslog source
+a1.sources.r1.type = syslogtcp
+# the port that Flume Syslog source will listen on
+a1.sources.r1.port = 514
+# the hostname that Flume Syslog source will be running on
+a1.sources.r1.host = 192.168.52.138
+
+# Describe the sink
+a1.sinks.k1.type = hdfs
+a1.sinks.k1.hdfs.path = /tmp/salidaFlume/syslog/%y-%m-%d/%H%M/%S
+a1.sinks.k1.hdfs.fileType = DataStream
+a1.sinks.k1.hdfs.writeFormat = Text
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1 
+
+3.2 Lanzamos el flume:
+[cloudera@quickstart etc]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumeSyslogHDFS.conf --name a1 -Dflume.root.logger=INFO,console 
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:<<MUCHAS LIBRERIAS>>/usr/lib/flume-ng/../search/lib/zookeeper.jar' -Djava.library.path=:/usr/lib/hadoop/lib/native:/usr/lib/hadoop/lib/native:/usr/lib/hbase/bin/../lib/native/Linux-amd64-64 org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumeSyslogHDFS.conf --name a1
+2016-09-19 02:21:24,969 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-19 02:21:24,975 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumeSyslogHDFS.conf
+2016-09-19 02:21:24,980 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 02:21:24,981 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: k1 Agent: a1
+2016-09-19 02:21:24,981 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 02:21:24,982 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 02:21:24,982 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 02:21:24,982 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 02:21:25,003 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [a1]
+2016-09-19 02:21:25,003 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-19 02:21:25,150 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c1 type memory
+2016-09-19 02:21:25,161 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c1
+2016-09-19 02:21:25,163 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source r1, type syslogtcp
+2016-09-19 02:21:25,178 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k1, type: hdfs
+2016-09-19 02:21:25,189 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c1 connected to [r1, k1]
+2016-09-19 02:21:25,196 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{r1=EventDrivenSourceRunner: { source:org.apache.flume.source.SyslogTcpSource{name:r1,state:IDLE} }} sinkRunners:{k1=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@5111778a counterGroup:{ name:null counters:{} } }} channels:{c1=org.apache.flume.channel.MemoryChannel{name: c1}} }
+2016-09-19 02:21:25,206 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c1
+2016-09-19 02:21:25,248 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c1: Successfully registered new MBean.
+2016-09-19 02:21:25,248 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c1 started
+2016-09-19 02:21:25,248 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k1
+2016-09-19 02:21:25,249 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source r1
+2016-09-19 02:21:25,250 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: k1: Successfully registered new MBean.
+2016-09-19 02:21:25,250 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: k1 started
+2016-09-19 02:21:25,291 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.source.SyslogTcpSource.start(SyslogTcpSource.java:119)] Syslog TCP Source starting...
+
+
+
+
+Revisamos si se ha creado correctamente la carpeta:
+
+[root@quickstart conf]# hadoop fs -ls /tmp/salidaFlume
+Found 1 items
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:22 /tmp/salidaFlume/syslog
+
+Y lanzamos mensajes:
+
+[root@quickstart conf]# logger -t test 'Prueba1'
+[root@quickstart conf]# logger -t test 'Prueba2'
+[root@quickstart conf]# logger -t test 'Prueba3'
+[root@quickstart conf]# logger -t test 'Prueba4'
+
+
+
+
+2016-09-19 02:21:25,291 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.source.SyslogTcpSource.start(SyslogTcpSource.java:119)] Syslog TCP Source starting...
+2016-09-19 02:22:52,324 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 02:22:53,094 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog/16-09-19/0222/52/FlumeData.1474276972325.tmp
+2016-09-19 02:23:24,869 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog/16-09-19/0222/52/FlumeData.1474276972325.tmp
+2016-09-19 02:23:24,890 (hdfs-k1-call-runner-4) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog/16-09-19/0222/52/FlumeData.1474276972325.tmp to /tmp/salidaFlume/syslog/16-09-19/0222/52/FlumeData.1474276972325
+2016-09-19 02:23:24,895 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 02:25:04,132 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 02:25:04,174 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog/16-09-19/0225/03/FlumeData.1474277104133.tmp
+2016-09-19 02:25:06,992 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 02:25:07,022 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog/16-09-19/0225/06/FlumeData.1474277106993.tmp
+2016-09-19 02:25:10,146 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 02:25:10,177 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog/16-09-19/0225/10/FlumeData.1474277110147.tmp
+2016-09-19 02:25:13,716 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 02:25:13,746 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog/16-09-19/0225/13/FlumeData.1474277113717.tmp
+2016-09-19 02:25:23,125 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 02:25:23,159 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog/16-09-19/0225/21/FlumeData.1474277123126.tmp
+2016-09-19 02:25:26,342 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 02:25:26,379 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog/16-09-19/0225/26/FlumeData.1474277126343.tmp
+2016-09-19 02:25:34,220 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog/16-09-19/0225/03/FlumeData.1474277104133.tmp
+2016-09-19 02:25:34,226 (hdfs-k1-call-runner-6) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog/16-09-19/0225/03/FlumeData.1474277104133.tmp to /tmp/salidaFlume/syslog/16-09-19/0225/03/FlumeData.1474277104133
+2016-09-19 02:25:34,228 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 02:25:37,065 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog/16-09-19/0225/06/FlumeData.1474277106993.tmp
+2016-09-19 02:25:37,072 (hdfs-k1-call-runner-8) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog/16-09-19/0225/06/FlumeData.1474277106993.tmp to /tmp/salidaFlume/syslog/16-09-19/0225/06/FlumeData.1474277106993
+2016-09-19 02:25:37,078 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 02:25:40,215 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog/16-09-19/0225/10/FlumeData.1474277110147.tmp
+2016-09-19 02:25:40,222 (hdfs-k1-call-runner-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog/16-09-19/0225/10/FlumeData.1474277110147.tmp to /tmp/salidaFlume/syslog/16-09-19/0225/10/FlumeData.1474277110147
+2016-09-19 02:25:40,226 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 02:25:43,787 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog/16-09-19/0225/13/FlumeData.1474277113717.tmp
+2016-09-19 02:25:43,796 (hdfs-k1-call-runner-2) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog/16-09-19/0225/13/FlumeData.1474277113717.tmp to /tmp/salidaFlume/syslog/16-09-19/0225/13/FlumeData.1474277113717
+2016-09-19 02:25:43,798 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 02:25:55,874 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog/16-09-19/0225/21/FlumeData.1474277123126.tmp
+2016-09-19 02:25:55,884 (hdfs-k1-call-runner-4) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog/16-09-19/0225/21/FlumeData.1474277123126.tmp to /tmp/salidaFlume/syslog/16-09-19/0225/21/FlumeData.1474277123126
+2016-09-19 02:25:55,887 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 02:25:56,415 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog/16-09-19/0225/26/FlumeData.1474277126343.tmp
+2016-09-19 02:25:56,423 (hdfs-k1-call-runner-6) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog/16-09-19/0225/26/FlumeData.1474277126343.tmp to /tmp/salidaFlume/syslog/16-09-19/0225/26/FlumeData.1474277126343
+2016-09-19 02:25:56,428 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+HDFS:
+[root@quickstart conf]# hadoop fs -lsr /tmp/salidaFlume
+lsr: DEPRECATED: Please use 'ls -R' instead.
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:22 /tmp/salidaFlume/syslog
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:22 /tmp/salidaFlume/syslog/16-09-19/0222
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:23 /tmp/salidaFlume/syslog/16-09-19/0222/52
+-rw-r--r--   1 root supergroup         53 2016-09-19 02:23 /tmp/salidaFlume/syslog/16-09-19/0222/52/FlumeData.1474276972325
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/03
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/03/FlumeData.1474277104133
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/06
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/06/FlumeData.1474277106993
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/10
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/10/FlumeData.1474277110147
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/13
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/13/FlumeData.1474277113717
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/21
+-rw-r--r--   1 root supergroup         90 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/21/FlumeData.1474277123126
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/26
+-rw-r--r--   1 root supergroup         93 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/26/FlumeData.1474277126343
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0225/26/FlumeData.1474277126343
+ntpd[1975]: 0.0.0.0 c618 08 no_sys_peer
+ntpd[1975]: 0.0.0.0 c613 03 spike_detect -2.676433 s
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0225/21/FlumeData.1474277123126
+ntpd[1975]: 0.0.0.0 061c 0c clock_step -2.672232 s
+ntpd[1975]: 0.0.0.0 0615 05 clock_sync
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0225/13/FlumeData.1474277113717
+test: Prueba4
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0225/10/FlumeData.1474277110147
+test: Prueba3
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0225/06/FlumeData.1474277106993
+test: Prueba2
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0225/03/FlumeData.1474277104133
+test: Prueba1
+
+
+Vemos como a parte de llegar nuestras pruebas. Todo lo que le llega al puerto 514, por ejemplo el ntdp:clock de unix.
+
+[root@quickstart conf]# hadoop fs -lsr /tmp/salidaFlume
+lsr: DEPRECATED: Please use 'ls -R' instead.
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:22 /tmp/salidaFlume/syslog
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:31 /tmp/salidaFlume/syslog/16-09-19
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:22 /tmp/salidaFlume/syslog/16-09-19/0222
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:23 /tmp/salidaFlume/syslog/16-09-19/0222/52
+-rw-r--r--   1 root supergroup         53 2016-09-19 02:23 /tmp/salidaFlume/syslog/16-09-19/0222/52/FlumeData.1474276972325
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/03
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/03/FlumeData.1474277104133
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/06
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/06/FlumeData.1474277106993
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/10
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/10/FlumeData.1474277110147
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/13
+-rw-r--r--   1 root supergroup         14 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/13/FlumeData.1474277113717
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/21
+-rw-r--r--   1 root supergroup         90 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/21/FlumeData.1474277123126
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/26
+-rw-r--r--   1 root supergroup         93 2016-09-19 02:25 /tmp/salidaFlume/syslog/16-09-19/0225/26/FlumeData.1474277126343
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:27 /tmp/salidaFlume/syslog/16-09-19/0227
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:28 /tmp/salidaFlume/syslog/16-09-19/0227/39
+-rw-r--r--   1 root supergroup        558 2016-09-19 02:28 /tmp/salidaFlume/syslog/16-09-19/0227/39/FlumeData.1474277263487
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:30 /tmp/salidaFlume/syslog/16-09-19/0230
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:30 /tmp/salidaFlume/syslog/16-09-19/0230/01
+-rw-r--r--   1 root supergroup         48 2016-09-19 02:30 /tmp/salidaFlume/syslog/16-09-19/0230/01/FlumeData.1474277401268
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:31 /tmp/salidaFlume/syslog/16-09-19/0231
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:32 /tmp/salidaFlume/syslog/16-09-19/0231/27
+-rw-r--r--   1 root supergroup        195 2016-09-19 02:32 /tmp/salidaFlume/syslog/16-09-19/0231/27/FlumeData.1474277490372
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0231/27/FlumeData.1474277490372
+postfix/pickup[7707]: warning: inet_protocols: IPv6 support is disabled: Address family not supported by protocol
+postfix/pickup[7707]: warning: inet_protocols: configuring for IPv4 support only
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog/16-09-19/0230/01/FlumeData.1474277401268
+CROND[7651]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+
+
+4. HTTP y HDFS
+Source:http
+Sink:hdfs
+Channel:memory
+
+Enviaremos al source ficheros JSON que seran enviados por HTTP Post a traves del canal al HDFS y almacenados.
+
+4.1 Creamos el fichero de configuracion:
+
+[root@quickstart conf]# ls -ltr
+total 40
+-rw-r--r-- 1 root root 1214 Mar 23 11:29 flume-env.sh.template
+-rw-r--r-- 1 root root 1110 Mar 23 11:29 flume-env.ps1.template
+-rw-r--r-- 1 root root 1661 Mar 23 11:29 flume-conf.properties.template
+-rw-r--r-- 1 root root 3118 Mar 23 11:41 log4j.properties
+-rw-r--r-- 1 root root    0 Mar 23 11:41 flume.conf
+-rwxrwxrwx 1 root root 2053 May 21 01:12 flumebit.conf
+-rwxrwxrwx 1 root root 2009 May 21 01:51 flumebitTail.conf
+-rwxr-xr-x 1 root root 1515 Sep 16 03:21 flumeNetcat.conf
+-rwxr-xr-x 1 root root 1403 Sep 19 01:39 flumeSyslog.conf
+-rwxr-xr-x 1 root root 1541 Sep 19 02:17 flumeSyslogHDFS.conf
+-rwxr-xr-x 1 root root 1633 Sep 19 03:29 flumeHTTPtoHDFS.conf
+
+
+flumeHTTPtoHDFS.conf:
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# Describe/configure the source
+a1.sources.r1.type =  http
+a1.sources.r1.port = 44448
+#a1.sources.r1.handler = org.apache.flume.http.JSONHandler
+
+# Describe the sink
+a1.sinks.k1.type = hdfs
+a1.sinks.k1.hdfs.path = hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/%{m_user}/%{m_year}/%{m_month}/%{m_day}
+a1.sinks.k1.hdfs.filePrefix = events-
+a1.sinks.k1.hdfs.writeFormat = Text
+a1.sinks.k1.hdfs.fileType = DataStream
+a1.sinks.k1.hdfs.round = true
+a1.sinks.k1.hdfs.roundValue = 10
+a1.sinks.k1.hdfs.roundUnit = minute
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+
+
+
+OBS: Vamos a intentar mandar los ficheros a la ruta por el protocolo hdfs:
+
+[cloudera@quickstart etc]$ hadoop fs -ls hdfs://quickstart.cloudera/tmp/salidaFlume
+Found 1 items
+drwxrwxrwt   - root supergroup          0 2016-09-19 02:22 hdfs://quickstart.cloudera/tmp/salidaFlume/syslog
+
+OBS2: Y los vamos a distribuir por %{m_user}/%{m_year}/%{m_month}/%{m_day}, los cuales son valores que vamos a meter en la cabecera del JSON. Poniendole al fichero en vez de FlumeData el valor events- 
+
+OBS3: El JSON tendra esta pinta:
+[{  
+"headers" : 
+{ 	"timestamp" : "434324343", 
+	"host" :"random_host.example.com", 
+	"field1" : "val1", 
+	"m_user" : "m_user", 
+	"m_year" : "m_year", 
+	"m_month" : "m_month", 
+	"m_day" : "m_day" },  
+"body" : "random_body"  
+}]
+
+4.2 Lanzamos el agente flume:
+
+[cloudera@quickstart conf.empty]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumeHTTPtoHDFS.conf --name a1 -Dflume.root.logger=INFO,console
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:...........org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumeHTTPtoHDFS.conf --name a1
+2016-09-19 03:34:54,842 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-19 03:34:54,848 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumeHTTPtoHDFS.conf
+2016-09-19 03:34:54,853 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,854 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: k1 Agent: a1
+2016-09-19 03:34:54,854 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,854 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,854 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,854 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,854 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,855 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,855 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,855 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 03:34:54,882 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [a1]
+2016-09-19 03:34:54,882 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-19 03:34:54,895 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c1 type memory
+2016-09-19 03:34:54,899 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c1
+2016-09-19 03:34:54,902 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source r1, type http
+2016-09-19 03:34:54,985 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k1, type: hdfs
+2016-09-19 03:34:54,994 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c1 connected to [r1, k1]
+2016-09-19 03:34:55,002 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{r1=EventDrivenSourceRunner: { source:org.apache.flume.source.http.HTTPSource{name:r1,state:IDLE} }} sinkRunners:{k1=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@fba3c49 counterGroup:{ name:null counters:{} } }} channels:{c1=org.apache.flume.channel.MemoryChannel{name: c1}} }
+2016-09-19 03:34:55,011 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c1
+2016-09-19 03:34:55,059 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c1: Successfully registered new MBean.
+2016-09-19 03:34:55,060 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c1 started
+2016-09-19 03:34:55,060 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k1
+2016-09-19 03:34:55,060 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source r1
+2016-09-19 03:34:55,062 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: k1: Successfully registered new MBean.
+2016-09-19 03:34:55,062 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: k1 started
+2016-09-19 03:34:55,082 (lifecycleSupervisor-1-0) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
+2016-09-19 03:34:55,150 (lifecycleSupervisor-1-0) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] jetty-6.1.26.cloudera.4
+2016-09-19 03:34:55,225 (lifecycleSupervisor-1-0) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Started SelectChannelConnector@0.0.0.0:44448
+2016-09-19 03:34:55,226 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: r1: Successfully registered new MBean.
+2016-09-19 03:34:55,226 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: r1 started
+
+
+
+4.3 Una vez arrancado el demonio de flume, lanzamos un curl http post con el JSON de ejemplo editado:
+
+Por ejemplo: 
+curl -X POST -d '[{  "headers" : { "timestamp" : "434324343", "host" :"random_host.example.com", "field1" : "val1", "m_user" : "usuario1", "m_year" : "2006", "m_month" : "06", "m_day" : "02" },  "body" : "random_body"  }]' localhost:44448
+
+
+
+[root@quickstart conf]# curl -X POST -d '[{  "headers" : { "timestamp" : "434324343", "host" :"random_host.example.com", "field1" : "val1", "m_user" : "usuario1", "m_year" : "2006", "m_month" : "06", "m_day" : "02" },  "body" : "random_body"  }]' localhost:44448
+[root@quickstart conf]# 
+
+
+4.4. Revisamos la salida:
+
+[cloudera@quickstart etc]$ hadoop fs -lsr hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink
+lsr: DEPRECATED: Please use 'ls -R' instead.
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02
+-rw-r--r--   1 root supergroup         12 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02/events-.1474281567441
+[cloudera@quickstart etc]$ hadoop fs -cat hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02/events-.1474281567441
+random_body
+[cloudera@quickstart etc]$ 
+
+
+Vemos como se distribuyen por las cabeceras que le hemos indicado. Y el mensaje es el body del evento: random_body
+
+4.5 Lanzamos otro JSON indicandole otro body.
+
+Por ejemplo: 
+curl -X POST -d '[{  "headers" : { "timestamp" : "434324343", "host" :"random_host.example.com", "field1" : "val1", "m_user" : "usuario2", "m_year" : "2012", "m_month" : "05", "m_day" : "22" },  "body" : "Esto es un mensaje de ejemplo"  }]' localhost:44448
+
+[cloudera@quickstart etc]$ hadoop fs -lsr hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink
+lsr: DEPRECATED: Please use 'ls -R' instead.
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02
+-rw-r--r--   1 root supergroup         12 2016-09-19 03:39 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02/events-.1474281567441
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:44 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:44 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:44 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05
+drwxrwxrwt   - root supergroup          0 2016-09-19 03:44 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05/22
+-rw-r--r--   1 root supergroup         30 2016-09-19 03:44 hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05/22/events-.1474281850371
+[cloudera@quickstart etc]$ hadoop fs -cat hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05/22/events-.1474281850371
+Esto es un mensaje de ejemplo
+[cloudera@quickstart etc]$ 
+
+
+4.6 Y en salida estandar podemos ver las trazas:
+
+...
+...
+...
+2016-09-19 03:34:55,225 (lifecycleSupervisor-1-0) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Started SelectChannelConnector@0.0.0.0:44448
+2016-09-19 03:34:55,226 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: r1: Successfully registered new MBean.
+2016-09-19 03:34:55,226 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: r1 started
+2016-09-19 03:39:27,440 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 03:39:27,687 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02/events-.1474281567441.tmp
+2016-09-19 03:39:59,092 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02/events-.1474281567441.tmp
+2016-09-19 03:39:59,116 (hdfs-k1-call-runner-4) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02/events-.1474281567441.tmp to hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario1/2006/06/02/events-.1474281567441
+2016-09-19 03:39:59,121 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 03:44:10,370 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 03:44:10,404 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05/22/events-.1474281850371.tmp
+2016-09-19 03:44:40,441 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05/22/events-.1474281850371.tmp
+2016-09-19 03:44:40,454 (hdfs-k1-call-runner-9) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05/22/events-.1474281850371.tmp to hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/usuario2/2012/05/22/events-.1474281850371
+2016-09-19 03:44:40,456 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+
+4. HTTP y HBASE
+Source:http
+Sink:hdfs
+Channel:memory
+
+4.1. Como siempre creamos un nuevo fichero de configuracion. Esta vez vamos a partir del mismo anterior y vamos a añadir un nuevo sink y un nuevo channel y vamos a dejar lo que estaba. De forma que hayan 2 sink (logger y hbase)  y 2 channel cada uno recogera de su channel correspondiente. Y el http source lo dejara en los 2 channel.
+
+
+flumeHTTPtoHDFSandHBASE.conf:
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1 c2
+
+# Describe/configure the source
+a1.sources.r1.type =  http
+a1.sources.r1.port = 44448
+#a1.sources.r1.handler = org.apache.flume.http.JSONHandler
+
+# Describe the sink 1
+a1.sinks.k1.type = hdfs
+a1.sinks.k1.hdfs.path = hdfs://quickstart.cloudera/tmp/salidaFlume/http_sink/%{m_user}/%{m_year}/%{m_month}/%{m_day}
+a1.sinks.k1.hdfs.filePrefix = events-
+a1.sinks.k1.hdfs.writeFormat = Text
+a1.sinks.k1.hdfs.fileType = DataStream
+a1.sinks.k1.hdfs.round = true
+a1.sinks.k1.hdfs.roundValue = 10
+a1.sinks.k1.hdfs.roundUnit = minute
+# Describe the sink 2
+a1.sinks.k2.type = asynchbase
+a1.sinks.k2.table = table_t1
+a1.sinks.k2.columnFamily = cf_1
+a1.sinks.k2.enableWal = false
+
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+a1.channels.c2.type = file
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+a1.channels.c2.dataDirs = /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/Ejercicios_Avanzados/LOCAL/channel-local
+
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1 c2
+a1.sinks.k1.channel = c1
+a1.sinks.k2.channel = c2
+
+
+4.2 Creamos una tabla en Hbase que se debe llamar table_t1 y su columnfamily debe ser: cf_1, tal y como hemos indicado en el archivo de configuracion de flume.
+
+
+[cloudera@quickstart conf.empty]$ hbase shell
+2016-09-19 04:40:47,339 INFO  [main] Configuration.deprecation: hadoop.native.lib is deprecated. Instead, use io.native.lib.available
+HBase Shell; enter 'help<RETURN>' for list of supported commands.
+Type "exit<RETURN>" to leave the HBase Shell
+Version 1.2.0-cdh5.7.0, rUnknown, Wed Mar 23 11:39:14 PDT 2016
+
+hbase(main):006:0> create 'table_t1' , 'cf_1'
+0 row(s) in 1.4040 seconds
+
+=> Hbase::Table - table_t1
+hbase(main):007:0> scan 'table_t1'
+ROW                                        COLUMN+CELL                                                                                                                 
+0 row(s) in 0.2940 seconds
+
+hbase(main):008:0> 
+
+
+IMPORTANTE: Si no tienes los servicios levantados de hbase no te va a funcionar, es necesario levantarlos:
+[root@quickstart init.d]# ./hbase-solr-indexer status
+HBase Solr Indexer is not running                          [FAILED]
+[root@quickstart init.d]# ./hbase-thrift status
+HBase thrift daemon is running                             [  OK  ]
+[root@quickstart init.d]# ./hbase-master status
+HBase master daemon is not running                         [FAILED]
+[root@quickstart init.d]# ./hbase-regionserver status
+hbase-regionserver is not running.
+[root@quickstart init.d]# ./hbase-rest status
+HBase rest daemon is running                               [  OK  ]
+[root@quickstart init.d]# ./hbase-solr-indexer start
+Started HBase Solr Indexer (hbase-solr-indexer) :          [  OK  ]
+[root@quickstart init.d]# ./hbase-thrift start
+HBase thrift daemon is running                             [  OK  ]
+[root@quickstart init.d]# ./hbase-rest start
+HBase rest daemon is running                               [  OK  ]
+[root@quickstart init.d]# ./hbase-regionserver start
+Starting Hadoop HBase regionserver daemon: starting regionserver, logging to /var/log/hbase/hbase-hbase-regionserver-quickstart.cloudera.out
+hbase-regionserver.
+[root@quickstart init.d]# ./hbase-master start
+starting master, logging to /var/log/hbase/hbase-hbase-master-quickstart.cloudera.out
+Started HBase master daemon (hbase-master):                [  OK  ]
+
+
+Como podemos ver la tabla esta vacia.
+
+
+4.3. Lanzamos el agente flume y le enviamos peticiones JSON:
+
+[cloudera@quickstart conf.empty]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumeHTTPtoHDFSandHBASE.conf --name a1 -Dflume.root.logger=INFO,console
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:............./lib/native/Linux-amd64-64 org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumeHTTPtoHDFSandHBASE.conf --name a1
+2016-09-19 04:48:00,289 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-19 04:48:00,295 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumeHTTPtoHDFSandHBASE.conf
+2016-09-19 04:48:00,300 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 04:48:00,301 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 04:48:00,301 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 04:48:00,301 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,301 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,301 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,301 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,301 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: k1 k2 Agent: a1
+2016-09-19 04:48:00,302 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 04:48:00,302 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,302 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 04:48:00,302 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,302 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,302 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,305 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 04:48:00,336 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [a1]
+2016-09-19 04:48:00,336 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-19 04:48:00,343 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c1 type memory
+2016-09-19 04:48:00,347 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c1
+2016-09-19 04:48:00,376 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c2 type file
+2016-09-19 04:48:00,392 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c2
+2016-09-19 04:48:00,392 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source r1, type http
+2016-09-19 04:48:00,446 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k1, type: hdfs
+2016-09-19 04:48:00,454 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k2, type: asynchbase
+2016-09-19 04:48:00,462 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:353)] No serializer defined, Will use default
+2016-09-19 04:48:00,807 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:403)] The write to WAL option is set to: false
+2016-09-19 04:48:00,807 (conf-file-poller-0) [WARN - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:405)] AsyncHBaseSink's enableWal configuration is set to false. All writes to HBase will have WAL disabled, and any data in the memstore of this region in the Region Server could be lost!
+2016-09-19 04:48:00,808 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c1 connected to [r1, k1]
+2016-09-19 04:48:00,809 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c2 connected to [r1, k2]
+2016-09-19 04:48:00,814 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{r1=EventDrivenSourceRunner: { source:org.apache.flume.source.http.HTTPSource{name:r1,state:IDLE} }} sinkRunners:{k1=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@269dc6db counterGroup:{ name:null counters:{} } }, k2=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@406a67ab counterGroup:{ name:null counters:{} } }} channels:{c1=org.apache.flume.channel.MemoryChannel{name: c1}, c2=FileChannel c2 { dataDirs: [/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/Ejercicios_Avanzados/LOCAL/channel-local] }} }
+2016-09-19 04:48:00,820 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c1
+2016-09-19 04:48:00,823 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c2
+2016-09-19 04:48:00,823 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.FileChannel.start(FileChannel.java:273)] Starting FileChannel c2 { dataDirs: [/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/Ejercicios_Avanzados/LOCAL/channel-local] }...
+2016-09-19 04:48:00,837 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.<init>(Log.java:344)] Encryption is not enabled
+2016-09-19 04:48:00,838 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.replay(Log.java:392)] Replay started
+2016-09-19 04:48:00,839 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.replay(Log.java:404)] Found NextFileID 0, from []
+2016-09-19 04:48:00,847 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.EventQueueBackingStoreFile.<init>(EventQueueBackingStoreFile.java:95)] Preallocated /root/.flume/file-channel/checkpoint/checkpoint to 16232 for capacity 1000
+2016-09-19 04:48:00,887 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.EventQueueBackingStoreFileV3.<init>(EventQueueBackingStoreFileV3.java:55)] Starting up with /root/.flume/file-channel/checkpoint/checkpoint and /root/.flume/file-channel/checkpoint/checkpoint.meta
+2016-09-19 04:48:00,900 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c1: Successfully registered new MBean.
+2016-09-19 04:48:00,900 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c1 started
+2016-09-19 04:48:01,086 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.FlumeEventQueue.<init>(FlumeEventQueue.java:116)] QueueSet population inserting 0 took 0
+2016-09-19 04:48:01,092 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.replay(Log.java:443)] Last Checkpoint Mon Sep 19 04:48:00 PDT 2016, queue depth = 0
+2016-09-19 04:48:01,094 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.doReplay(Log.java:528)] Replaying logs with v2 replay logic
+2016-09-19 04:48:01,136 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.ReplayHandler.replayLog(ReplayHandler.java:249)] Starting replay of []
+2016-09-19 04:48:01,136 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.ReplayHandler.replayLog(ReplayHandler.java:346)] read: 0, put: 0, take: 0, rollback: 0, commit: 0, skip: 0, eventCount:0
+2016-09-19 04:48:01,136 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.FlumeEventQueue.replayComplete(FlumeEventQueue.java:409)] Search Count = 0, Search Time = 0, Copy Count = 0, Copy Time = 0
+2016-09-19 04:48:01,142 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.replay(Log.java:491)] Rolling /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/Ejercicios_Avanzados/LOCAL/channel-local
+2016-09-19 04:48:01,142 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.roll(Log.java:961)] Roll start /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/Ejercicios_Avanzados/LOCAL/channel-local
+2016-09-19 04:48:01,160 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.tools.DirectMemoryUtils.getDefaultDirectMemorySize(DirectMemoryUtils.java:114)] Unable to get maxDirectMemory from VM: NoSuchMethodException: sun.misc.VM.maxDirectMemory(null)
+2016-09-19 04:48:01,162 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.tools.DirectMemoryUtils.allocate(DirectMemoryUtils.java:48)] Direct Memory Allocation:  Allocation = 1048576, Allocated = 0, MaxDirectMemorySize = 18874368, Remaining = 18874368
+2016-09-19 04:48:01,191 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.LogFile$Writer.<init>(LogFile.java:214)] Opened /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/Ejercicios_Avanzados/LOCAL/channel-local/log-1
+2016-09-19 04:48:01,200 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.roll(Log.java:977)] Roll end
+2016-09-19 04:48:01,200 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.EventQueueBackingStoreFile.beginCheckpoint(EventQueueBackingStoreFile.java:230)] Start checkpoint for /root/.flume/file-channel/checkpoint/checkpoint, elements to sync = 0
+2016-09-19 04:48:01,205 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.EventQueueBackingStoreFile.checkpoint(EventQueueBackingStoreFile.java:255)] Updating checkpoint metadata: logWriteOrderID: 1474285681143, queueSize: 0, queueHead: 0
+2016-09-19 04:48:01,250 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.Log.writeCheckpoint(Log.java:1034)] Updated checkpoint for file: /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/Ejercicios_Avanzados/LOCAL/channel-local/log-1 position: 0 logWriteOrderID: 1474285681143
+2016-09-19 04:48:01,250 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.channel.file.FileChannel.start(FileChannel.java:301)] Queue Size after replay: 0 [channel=c2]
+2016-09-19 04:48:01,250 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c2: Successfully registered new MBean.
+2016-09-19 04:48:01,250 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c2 started
+2016-09-19 04:48:01,250 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k1
+2016-09-19 04:48:01,251 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k2
+2016-09-19 04:48:01,252 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: k2: Successfully registered new MBean.
+2016-09-19 04:48:01,252 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: k1: Successfully registered new MBean.
+2016-09-19 04:48:01,252 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: k1 started
+2016-09-19 04:48:01,252 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: k2 started
+2016-09-19 04:48:01,252 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:445)] Initializing HBase Client
+2016-09-19 04:48:01,252 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source r1
+2016-09-19 04:48:01,253 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:449)] Callback pool created
+2016-09-19 04:48:01,305 (lifecycleSupervisor-1-5) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
+2016-09-19 04:48:01,368 (lifecycleSupervisor-1-5) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] jetty-6.1.26.cloudera.4
+2016-09-19 04:48:01,460 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:zookeeper.version=3.4.5-cdh5.7.0--1, built on 03/23/2016 18:30 GMT
+2016-09-19 04:48:01,460 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:host.name=quickstart.cloudera
+2016-09-19 04:48:01,460 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.version=1.7.0_67
+2016-09-19 04:48:01,461 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.vendor=Oracle Corporation
+2016-09-19 04:48:01,461 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.home=/usr/java/jdk1.7.0_67-cloudera/jre
+2016-09-19 04:48:01,461 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.class.path=/etc/flume-ng/conf:/usr/lib/flume-ng/lib/snappy-java-1.0.4.1.jar:/usr/lib/flume-ng/lib/flume-kafka-channel-1.6.0-cdh5.7.0.jar:/usr/lib/flume-ng/lib/libthrift-0.9.2.jar:/usr/lib/flume-ng/lib/fastutil-6.3.jar:/usr/lib/flume-ng/lib/flume-jdbc-channel.jar................../search/lib/xmpcore-5.1.2.jar:/usr/lib/flume-ng/../search/lib/xz-1.0.jar:/usr/lib/flume-ng/../search/lib/zookeeper.jar
+2016-09-19 04:48:01,471 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.library.path=:/usr/lib/hadoop/lib/native:/usr/lib/hadoop/lib/native:/usr/lib/hbase/bin/../lib/native/Linux-amd64-64
+2016-09-19 04:48:01,472 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.io.tmpdir=/tmp
+2016-09-19 04:48:01,472 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.compiler=<NA>
+2016-09-19 04:48:01,472 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:os.name=Linux
+2016-09-19 04:48:01,472 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:os.arch=amd64
+2016-09-19 04:48:01,472 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:os.version=2.6.32-573.el6.x86_64
+2016-09-19 04:48:01,473 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:user.name=root
+2016-09-19 04:48:01,473 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:user.home=/root
+2016-09-19 04:48:01,473 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:user.dir=/etc/flume-ng/conf.empty
+2016-09-19 04:48:01,470 (lifecycleSupervisor-1-5) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Started SelectChannelConnector@0.0.0.0:44448
+2016-09-19 04:48:01,474 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: r1: Successfully registered new MBean.
+2016-09-19 04:48:01,474 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: r1 started
+2016-09-19 04:48:01,474 (lifecycleSupervisor-1-6) [INFO - org.apache.zookeeper.ZooKeeper.<init>(ZooKeeper.java:438)] Initiating client connection, connectString=localhost:2181 sessionTimeout=5000 watcher=org.hbase.async.HBaseClient$ZKClient@294e58d8
+2016-09-19 04:48:01,486 (lifecycleSupervisor-1-6) [INFO - org.hbase.async.HBaseClient$ZKClient.getDeferredRoot(HBaseClient.java:2911)] Need to find the -ROOT- region
+2016-09-19 04:48:01,515 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:475)] waiting on callback
+2016-09-19 04:48:01,517 (lifecycleSupervisor-1-6-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.logStartConnect(ClientCnxn.java:975)] Opening socket connection to server quickstart.cloudera/127.0.0.1:2181. Will not attempt to authenticate using SASL (unknown error)
+2016-09-19 04:48:01,518 (lifecycleSupervisor-1-6-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.primeConnection(ClientCnxn.java:852)] Socket connection established, initiating session, client: /127.0.0.1:34848, server: quickstart.cloudera/127.0.0.1:2181
+2016-09-19 04:48:01,528 (lifecycleSupervisor-1-6-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.onConnected(ClientCnxn.java:1235)] Session establishment complete on server quickstart.cloudera/127.0.0.1:2181, sessionid = 0x156fefc68500107, negotiated timeout = 5000
+2016-09-19 04:48:01,548 (lifecycleSupervisor-1-6-EventThread) [INFO - org.hbase.async.HBaseClient$ZKClient$ZKCallback.handleMetaZnode(HBaseClient.java:3274)] Connecting to .META. region @ 127.0.0.1:60020
+2016-09-19 04:48:01,586 (lifecycleSupervisor-1-6-EventThread) [INFO - org.apache.zookeeper.ZooKeeper.close(ZooKeeper.java:684)] Session: 0x156fefc68500107 closed
+2016-09-19 04:48:01,586 (lifecycleSupervisor-1-6-EventThread) [INFO - org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:512)] EventThread shut down
+2016-09-19 04:48:01,657 (New I/O worker #1) [INFO - org.hbase.async.HBaseClient.discoverRegion(HBaseClient.java:2159)] Added client for region RegionInfo(table="table_t1", region_name="table_t1,,1474285391555.fea53327544dd6018c7b81c6c01e6762.", stop_key=""), which was added to the regions cache.  Now we know that RegionClient@1004224776(chan=[id: 0xe4695d55, /127.0.0.1:60690 => /127.0.0.1:60020], #pending_rpcs=0, #batched=0, #rpcs_inflight=0) is hosting 1 region.
+2016-09-19 04:48:01,660 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:477)] callback received
+2016-09-19 04:48:01,660 (New I/O worker #1) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink$1.call(AsyncHBaseSink.java:461)] table found
+
+
+Se ve como se han iniciado el sink, los dos canales (chakeando la ruta asociada) y ambos sink (el de hbase ha tenido que levantar zookeper y chekear la tabla)
+Lanzamos la peticion:
+
+[root@quickstart conf]# curl -X POST -d '[{  "headers" : { "timestamp" : "434324343", "host" :"random_host.example.com", "field1" : "val1", "m_user" : "usuario4", "m_year" : "2002", "m_month" : "06", "m_day" : "02" },  "body" : "Prueba HBASE"  }]' localhost:44448
+
+
+4.4 Revisamos:
+
+1. Tabla en HBase:
+
+[cloudera@quickstart etc]$ hbase shell
+2016-09-19 04:55:30,733 INFO  [main] Configuration.deprecation: hadoop.native.lib is deprecated. Instead, use io.native.lib.available
+HBase Shell; enter 'help<RETURN>' for list of supported commands.
+Type "exit<RETURN>" to leave the HBase Shell
+Version 1.2.0-cdh5.7.0, rUnknown, Wed Mar 23 11:39:14 PDT 2016
+
+hbase(main):001:0> scan 'table_t1'
+ROW                                        COLUMN+CELL                                                                                                                 
+ default97a849a3-0673-41ec-a288-cb2fa2c179 column=cf_1:pCol, timestamp=1474286059172, value=Prueba HBASE                                                               
+ e1                                                                                                                                                                    
+ incRow                                    column=cf_1:iCol, timestamp=1474286059177, value=\x00\x00\x00\x00\x00\x00\x00\x01                                           
+2 row(s) in 0.2430 seconds
+
+
+
+2. En HDFS:
+
+[root@quickstart conf]# hadoop fs -ls -R /tmp/salidaFlume/http_sink/usuario4
+drwxrwxrwt   - root supergroup          0 2016-09-19 04:54 /tmp/salidaFlume/http_sink/usuario4/2002
+drwxrwxrwt   - root supergroup          0 2016-09-19 04:54 /tmp/salidaFlume/http_sink/usuario4/2002/06
+drwxrwxrwt   - root supergroup          0 2016-09-19 04:54 /tmp/salidaFlume/http_sink/usuario4/2002/06/02
+-rw-r--r--   1 root supergroup         13 2016-09-19 04:54 /tmp/salidaFlume/http_sink/usuario4/2002/06/02/events-.1474286057739
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/http_sink/usuario4/2002/06/02/events-.1474286057739
+Prueba HBASE
+
+
+3. Si se ha guardado algun fichero local por el canal:
+[root@quickstart channel-local]# ls -ltr
+total 1028
+-rw-r--r-- 1 root root       0 Sep 19 04:48 in_use.lock
+-rw-r--r-- 1 root root 1048576 Sep 19 04:54 log-1
+-rw-r--r-- 1 root root      47 Sep 19 04:54 log-1.meta
+[root@quickstart channel-local]# cat log-1
+C:FBW�9FBW�
+�
+
+	timestamp	434324343
+
+m_month06
+
+hostrandom_host.example.com
+
+m_userusuario4
+
+
+m_day02
+
+field1val1
+
+m_year2002
+D:FBW�9FBWrueba HBASE��1�
+������
+
+
+5. INTERCEPTORES
+
+Vamos a coger el fichero flumeSyslogHDFS.conf que dejaba en HDFS distribuido por fecha y lo vamos a interceptar y le vamos a añadir una nueva cabecera que va a ser el host.
+
+5.1 Añadimos un interceptor a la configuracion de flume
+
+flumeSyslogHDFS-Interceptor.conf:
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# I'll be using TCP based Syslog source
+a1.sources.r1.type = syslogtcp
+# the port that Flume Syslog source will listen on
+a1.sources.r1.port = 514
+# the hostname that Flume Syslog source will be running on
+a1.sources.r1.host = 192.168.52.138
+
+#Interceptor
+# Attached the interceptor to the source
+a1.sources.r1.interceptors = i1
+a1.sources.r1.interceptors.i1.type = com.mbit.interceptors.CustomHostInterceptor$Builder
+a1.sources.r1.interceptors.i1.hostHeader = hostname
+
+# Describe the sink
+a1.sinks.k1.type = hdfs
+a1.sinks.k1.hdfs.path = /tmp/salidaFlume/syslog-intercep/%{hostname}/%y-%m-%d/%H%M/%S
+a1.sinks.k1.hdfs.fileType = DataStream
+a1.sinks.k1.hdfs.writeFormat = Text
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+
+IMPORTANTE:
+Realmente lo que se ha añadido es el propio interceptor:
+a1.sources.r1.interceptors = i1
+a1.sources.r1.interceptors.i1.type = com.mbit.interceptors.CustomHostInterceptor$Builder
+a1.sources.r1.interceptors.i1.hostHeader = hostname
+
+Y hemos modificado el path de hdfs incluyendole el nombre del host:
+a1.sinks.k1.hdfs.path = /tmp/salidaFlume/syslog-intercep/%{hostname}/%y-%m-%d/%H%M/%S
+
+Esto lo que hara es que podamos interceptar los eventos y meter en la cabecera un campo que hemos nombrado como hostname pero que como campo del interceptor se llamara hostHeader.
+Por lo tanto luego podemos usar el header hostname para distribuir la peticiones.
+
+
+
+5.2 Nos creamos un proycto Java (con MVN) y creamos el interceptor:
+a) Incluimos en pom.xml el core de flume para la vesion 5.7.0 de CDH:
+
+pom.xml
+...
+...
+<flume-core-version>1.6.0-cdh5.7.0</flume-core-version>
+...
+...
+...
+<dependency>
+	<groupId>org.apache.flume</groupId>
+    	<artifactId>flume-ng-core</artifactId>
+    	<version>${flume-core-version}</version>
+</dependency>
+...
+...
+...
+
+b) Creamos el nuevo interceptor y sobre escribimos al menos los metodos intercept(List<Event>), intercept(Event) e initialize():
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.FlumeException;
+import org.apache.flume.interceptor.Interceptor;
+
+public class CustomHostInterceptor implements Interceptor {
+
+  private String hostValue;
+  private String hostHeader;
+
+  public CustomHostInterceptor(String hostHeader) {
+    this.hostHeader = hostHeader;
+  }
+
+  @Override
+  public void initialize() {
+    // At interceptor start up
+    try {
+      hostValue = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      throw new FlumeException("Cannot get Hostname", e);
+    }
+  }
+
+  @Override
+  public Event intercept(Event event) {
+
+    // This is the event's body
+    String body = new String(event.getBody());
+
+    System.out.println("--->body:" + body);
+
+    // These are the event's headers
+    Map<String, String> headers = event.getHeaders();
+
+    // Enrich header with hostname
+    headers.put(hostHeader, hostValue);
+
+    System.out.println("--->headers:" + headers);
+
+
+    // Let the enriched event go
+    return event;
+  }
+
+  @Override
+  public List<Event> intercept(List<Event> events) {
+
+    List<Event> interceptedEvents =
+        new ArrayList<Event>(events.size());
+    for (Event event : events) {
+      // Intercept any event
+      Event interceptedEvent = intercept(event);
+      interceptedEvents.add(interceptedEvent);
+    }
+
+    return interceptedEvents;
+  }
+
+  @Override
+  public void close() {
+    // At interceptor shutdown
+  }
+
+  public static class Builder implements Interceptor.Builder {
+
+    private String hostHeader;
+
+    @Override
+    public void configure(Context context) {
+      // Retrieve property from flume conf
+      hostHeader = context.getString("hostHeader");
+    }
+
+    @Override
+    public Interceptor build() {
+      return new CustomHostInterceptor(hostHeader);
+    }
+  }
+}
+
+c) Compilamos con MVN, y generamos el jar: training_flume-0.0.1-SNAPSHOT.jar
+
+d) Incluimos el jar en la ruta de librerias de flume (en /usr/lib/flume-ng/lib/* que es lo que carga el demonio al levantarse)
+
+[root@quickstart lib]# cp /home/cloudera/workspace/training_flume/target/training_flume-0.0.1-SNAPSHOT.jar training_flume.jar
+[root@quickstart lib]# ls -ltr
+total 21516
+...
+...
+...
+-rw-r--r-- 1 root root     4532 Sep 19 05:44 training_flume.jar
+[root@quickstart lib]# chmod 775 training_flume.jar
+
+
+IMPORTANTE: El proyecto se llama training-flume y va incluido en carpeta: ECLIPSE
+
+
+5.3 Lanzamos el agente:
+
+[cloudera@quickstart etc]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumeSyslogHDFS-Interceptor.conf --name a1 -Dflume.root.logger=INFO,console
+...
+...
+...
+2016-09-19 08:47:23,919 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.source.SyslogTcpSource.start(SyslogTcpSource.java:119)] Syslog TCP Source starting...
+--->body:test: Interceptores22
+--->headers:{timestamp=1474300067000, Severity=5, host=quickstart, Facility=1, priority=13, hostname=quickstart.cloudera}
+2016-09-19 08:47:47,823 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 08:47:48,112 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/47/FlumeData.1474300067824.tmp
+--->body:test: Interceptores33
+--->headers:{timestamp=1474300072000, Severity=5, host=quickstart, Facility=1, priority=13, hostname=quickstart.cloudera}
+2016-09-19 08:47:52,638 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-19 08:47:52,686 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/52/FlumeData.1474300072639.tmp
+2016-09-19 08:48:19,704 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/47/FlumeData.1474300067824.tmp
+2016-09-19 08:48:19,732 (hdfs-k1-call-runner-7) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/47/FlumeData.1474300067824.tmp to /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/47/FlumeData.1474300067824
+2016-09-19 08:48:19,737 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+2016-09-19 08:48:24,451 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/52/FlumeData.1474300072639.tmp
+2016-09-19 08:48:24,468 (hdfs-k1-call-runner-9) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/52/FlumeData.1474300072639.tmp to /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/52/FlumeData.1474300072639
+2016-09-19 08:48:24,470 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+5.4 Lanzamos mensajes:
+[root@quickstart conf]# logger -t test 'Interceptores22'
+[root@quickstart conf]# logger -t test 'Interceptores33'
+
+
+Y revisamos el HDFS:
+
+[root@quickstart conf]# hadoop fs -ls -R /tmp/salidaFlume/syslog-intercep
+drwxrwxrwt   - root supergroup          0 2016-09-19 08:47 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera
+drwxrwxrwt   - root supergroup          0 2016-09-19 08:50 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19
+drwxrwxrwt   - root supergroup          0 2016-09-19 08:47 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847
+drwxrwxrwt   - root supergroup          0 2016-09-19 08:48 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/47
+-rw-r--r--   1 root supergroup         22 2016-09-19 08:48 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/47/FlumeData.1474300067824
+drwxrwxrwt   - root supergroup          0 2016-09-19 08:48 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/52
+-rw-r--r--   1 root supergroup         22 2016-09-19 08:48 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/52/FlumeData.1474300072639
+drwxrwxrwt   - root supergroup          0 2016-09-19 08:50 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0850
+drwxrwxrwt   - root supergroup          0 2016-09-19 08:50 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0850/01
+-rw-r--r--   1 root supergroup         49 2016-09-19 08:50 /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0850/01/FlumeData.1474300201931
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/47/FlumeData.1474300067824
+test: Interceptores22
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0847/52/FlumeData.1474300072639
+test: Interceptores33
+[root@quickstart conf]# hadoop fs -cat /tmp/salidaFlume/syslog-intercep/quickstart.cloudera/16-09-19/0850/01/FlumeData.1474300201931
+CROND[31456]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+[root@quickstart conf]# 
+
+
+
+En la salida del demonio podemos ver las trazas que hemos puesto en nuestro interceptor:
+--->body:test: Interceptores22
+--->headers:{timestamp=1474300067000, Severity=5, host=quickstart, Facility=1, priority=13, hostname=quickstart.cloudera}
+
+Aqui vemos nuestra nueva cabecera: hostname=quickstart.cloudera, y luego podemos observar como la utilizamos para distribuir los archivos. Si vinieran peticiones de varias maquinas (instalados sus correspondientes flume) podriamos ver los sysout que vienen de cada maquina.
+
+
+
+6. CHANNEL SELECTOR:
+El channel selector te permite seleccionar por donde va a ir tu mensaje.
+Por ejemplo si tenemos 3 channel podemos asignarle al source un selector y dependiendo del mapping ira por un canal o por otro:
+agent1.sources.source1.selector.type = multiplexing
+agent1.sources.source1.selector.header = location
+agent1.sources.source1.selector.mapping.US = channel1
+agent1.sources.source1.selector.mapping.UK = channel2
+agent1.sources.source1.selector.mapping.INDIA = channel3
+agent1.sources.source1.selector.default = channel1
+
+En este caso decimos que el source1 tendra un multiplexing que dependiendo del valor del header location ira por un canal u otro. Posibles valores: US, UK e INDIA
+
+Si cada canal por ejemplo fuera a una tabla diferente de HIVE, o de HBase o tuviera un sink diferente es un forma muy buena de dividir los mensajes.
+
+6.1 Nos creamos un interceptor que recoja los eventos e incluya el location como cabecera:
+
+public class CustomLocationInterceptor implements Interceptor {
+
+  private String _header;
+  private String _defaultLocation;
+
+  @Override
+  public void initialize() {
+    _header = "location";
+    _defaultLocation = "US";
+  }
+
+  @Override
+  public Event intercept(Event event) {
+
+    String location = _defaultLocation;
+    
+    byte[] eventBody = event.getBody();
+
+    System.out.println("--->body:" + eventBody);
+
+    try {
+       ObjectMapper mapper = new ObjectMapper();
+       JsonNode rootNode = mapper.readTree(new String(eventBody));   
+       location = rootNode.get("location").getValueAsText();
+       System.out.println("--->location:" + location); 
+    } catch (JsonProcessingException e) {
+   
+    } catch (Exception e) {
+ 
+    }
+   
+    Map<String, String> headers = event.getHeaders();
+    headers.put(_header, location);
+   
+    event.setHeaders(headers);
+
+    System.out.println("--->headers:" + headers);
+   
+    return event;
+  }
+
+  @Override
+  public List<Event> intercept(List<Event> events) {
+
+    List<Event> interceptedEvents =
+        new ArrayList<Event>(events.size());
+    for (Event event : events) {
+      // Intercept any event
+      Event interceptedEvent = intercept(event);
+      interceptedEvents.add(interceptedEvent);
+    }
+
+    return interceptedEvents;
+  }
+
+  @Override
+  public void close() {
+    // At interceptor shutdown
+  }
+
+  public static class Builder implements Interceptor.Builder {
+
+    @Override
+    public void configure(Context context) {
+    }
+
+    @Override
+    public Interceptor build() {
+      return new CustomLocationInterceptor();
+    }
+  }
+
+Utilizamos la libreria de jackson (que se baja con flume-ng-core) para recoger el location del JSON, y luego lo metemos como cabecera.
+Una vez terminado y compilado lo copiamos a lib en flume.
+
+6.2 Creamos el fichero de configuracion:
+
+flumeChannelSelectortoHBASE.conf:
+
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1 k2 k3
+a1.channels = c1 c2 c3
+
+# Describe/configure the source
+a1.sources.r1.type =  http
+a1.sources.r1.port = 44448
+a1.sources.r1.channels = c1 c2 c3
+
+a1.sources.source1.interceptors = i1
+a1.sources.source1.interceptors.i1.type = com.mbit.interceptors.CustomLocationInterceptor$Builder
+
+a1.sources.source1.selector.type = multiplexing
+a1.sources.source1.selector.header = location
+a1.sources.source1.selector.mapping.US = c1
+a1.sources.source1.selector.mapping.UK = c2
+a1.sources.source1.selector.mapping.INDIA = c3
+a1.sources.source1.selector.default = c1
+
+
+# Describe the sink 1
+a1.sinks.k1.type = asynchbase
+a1.sinks.k1.table = t_us
+a1.sinks.k1.columnFamily = cf_us
+a1.sinks.k1.enableWal = false
+# Describe the sink 2
+a1.sinks.k2.type = asynchbase
+a1.sinks.k2.table = t_uk
+a1.sinks.k2.columnFamily = cf_uk
+a1.sinks.k2.enableWal = false
+# Describe the sink 3
+a1.sinks.k3.type = asynchbase
+a1.sinks.k3.table = t_india
+a1.sinks.k3.columnFamily = cf_india
+a1.sinks.k3.enableWal = false
+
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+a1.channels.c3.type = memory
+a1.channels.c3.capacity = 1000
+a1.channels.c3.transactionCapacity = 100
+
+
+# Bind sink to the channel
+a1.sinks.k1.channel = c1
+a1.sinks.k2.channel = c2
+a1.sinks.k3.channel = c3
+
+
+En principio lo que vamos a hacer es distribuir esos mensajes a varias tablas de HBase
+
+
+6.3. Creamos la tablas en Hbase
+
+[root@quickstart init.d]# hbase shell
+2016-09-19 10:14:21,312 INFO  [main] Configuration.deprecation: hadoop.native.lib is deprecated. Instead, use io.native.lib.available
+HBase Shell; enter 'help<RETURN>' for list of supported commands.
+Type "exit<RETURN>" to leave the HBase Shell
+Version 1.2.0-cdh5.7.0, rUnknown, Wed Mar 23 11:39:14 PDT 2016
+
+hbase(main):001:0> create 't_us', 'cf_us'
+0 row(s) in 1.5240 seconds
+
+=> Hbase::Table - t_us
+hbase(main):002:0> create 't_uk', 'cf_uk'
+0 row(s) in 1.2250 seconds
+
+=> Hbase::Table - t_uk
+hbase(main):003:0> create 't_india', 'cf_india'
+0 row(s) in 1.2240 seconds
+
+=> Hbase::Table - t_india
+
+
+
+6.4 Lanzamos el agente flume
+
+[cloudera@quickstart etc]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumeChannelSelectortoHBASE.conf --name a1 -Dflume.root.logger=INFO,console
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:............/lib/native/Linux-amd64-64 org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumeChannelSelectortoHBASE.conf --name a1
+2016-09-19 10:18:57,293 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-19 10:18:57,304 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumeChannelSelectortoHBASE.conf
+2016-09-19 10:18:57,312 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 10:18:57,313 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 10:18:57,313 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 10:18:57,313 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k3
+2016-09-19 10:18:57,313 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k3
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k3
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: k1 k2 k3 Agent: a1
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k3
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k2
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 10:18:57,314 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 10:18:57,316 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k3
+2016-09-19 10:18:57,317 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:k1
+2016-09-19 10:18:57,359 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [a1]
+2016-09-19 10:18:57,359 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-19 10:18:57,368 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c1 type memory
+2016-09-19 10:18:57,372 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c1
+2016-09-19 10:18:57,372 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c2 type memory
+2016-09-19 10:18:57,372 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c2
+2016-09-19 10:18:57,373 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel c3 type memory
+2016-09-19 10:18:57,373 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel c3
+2016-09-19 10:18:57,374 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source r1, type http
+2016-09-19 10:18:57,433 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k3, type: asynchbase
+2016-09-19 10:18:57,443 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:353)] No serializer defined, Will use default
+2016-09-19 10:18:57,809 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:403)] The write to WAL option is set to: false
+2016-09-19 10:18:57,809 (conf-file-poller-0) [WARN - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:405)] AsyncHBaseSink's enableWal configuration is set to false. All writes to HBase will have WAL disabled, and any data in the memstore of this region in the Region Server could be lost!
+2016-09-19 10:18:57,810 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k1, type: asynchbase
+2016-09-19 10:18:57,810 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:353)] No serializer defined, Will use default
+2016-09-19 10:18:57,912 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:403)] The write to WAL option is set to: false
+2016-09-19 10:18:57,912 (conf-file-poller-0) [WARN - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:405)] AsyncHBaseSink's enableWal configuration is set to false. All writes to HBase will have WAL disabled, and any data in the memstore of this region in the Region Server could be lost!
+2016-09-19 10:18:57,912 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: k2, type: asynchbase
+2016-09-19 10:18:57,912 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:353)] No serializer defined, Will use default
+2016-09-19 10:18:57,981 (conf-file-poller-0) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:403)] The write to WAL option is set to: false
+2016-09-19 10:18:57,983 (conf-file-poller-0) [WARN - org.apache.flume.sink.hbase.AsyncHBaseSink.configure(AsyncHBaseSink.java:405)] AsyncHBaseSink's enableWal configuration is set to false. All writes to HBase will have WAL disabled, and any data in the memstore of this region in the Region Server could be lost!
+2016-09-19 10:18:57,985 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c1 connected to [r1, k1]
+2016-09-19 10:18:57,985 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c2 connected to [r1, k2]
+2016-09-19 10:18:57,985 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel c3 connected to [r1, k3]
+2016-09-19 10:18:57,992 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{r1=EventDrivenSourceRunner: { source:org.apache.flume.source.http.HTTPSource{name:r1,state:IDLE} }} sinkRunners:{k3=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@60277ae1 counterGroup:{ name:null counters:{} } }, k1=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@3ff47b18 counterGroup:{ name:null counters:{} } }, k2=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@4bbd8575 counterGroup:{ name:null counters:{} } }} channels:{c1=org.apache.flume.channel.MemoryChannel{name: c1}, c2=org.apache.flume.channel.MemoryChannel{name: c2}, c3=org.apache.flume.channel.MemoryChannel{name: c3}} }
+2016-09-19 10:18:57,999 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c1
+2016-09-19 10:18:57,999 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c2
+2016-09-19 10:18:58,000 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel c3
+2016-09-19 10:18:58,052 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c2: Successfully registered new MBean.
+2016-09-19 10:18:58,052 (lifecycleSupervisor-1-2) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c3: Successfully registered new MBean.
+2016-09-19 10:18:58,053 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c2 started
+2016-09-19 10:18:58,053 (lifecycleSupervisor-1-2) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c3 started
+2016-09-19 10:18:58,053 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: c1: Successfully registered new MBean.
+2016-09-19 10:18:58,053 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: c1 started
+2016-09-19 10:18:58,053 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k3
+2016-09-19 10:18:58,054 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: k3: Successfully registered new MBean.
+2016-09-19 10:18:58,054 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: k3 started
+2016-09-19 10:18:58,054 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:445)] Initializing HBase Client
+2016-09-19 10:18:58,055 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:449)] Callback pool created
+2016-09-19 10:18:58,070 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k1
+2016-09-19 10:18:58,074 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: k1: Successfully registered new MBean.
+2016-09-19 10:18:58,075 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: k1 started
+2016-09-19 10:18:58,075 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:445)] Initializing HBase Client
+2016-09-19 10:18:58,075 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:449)] Callback pool created
+2016-09-19 10:18:58,081 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink k2
+2016-09-19 10:18:58,086 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source r1
+2016-09-19 10:18:58,086 (lifecycleSupervisor-1-9) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: k2: Successfully registered new MBean.
+2016-09-19 10:18:58,086 (lifecycleSupervisor-1-9) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: k2 started
+2016-09-19 10:18:58,087 (lifecycleSupervisor-1-9) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:445)] Initializing HBase Client
+2016-09-19 10:18:58,087 (lifecycleSupervisor-1-9) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:449)] Callback pool created
+2016-09-19 10:18:58,111 (lifecycleSupervisor-1-6) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
+2016-09-19 10:18:58,254 (lifecycleSupervisor-1-6) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] jetty-6.1.26.cloudera.4
+2016-09-19 10:18:58,257 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:zookeeper.version=3.4.5-cdh5.7.0--1, built on 03/23/2016 18:30 GMT
+2016-09-19 10:18:58,258 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:host.name=quickstart.cloudera
+2016-09-19 10:18:58,258 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.version=1.7.0_67
+2016-09-19 10:18:58,258 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.vendor=Oracle Corporation
+2016-09-19 10:18:58,258 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.home=/usr/java/jdk1.7.0_67-cloudera/jre
+2016-09-19 10:18:58,261 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.class.path=/etc/flume-ng/conf:/usr/lib/flume-ng/lib/snappy-java-1.0.4.1.jar................../search/lib/zookeeper.jar
+2016-09-19 10:18:58,279 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.library.path=:/usr/lib/hadoop/lib/native:/usr/lib/hadoop/lib/native:/usr/lib/hbase/bin/../lib/native/Linux-amd64-64
+2016-09-19 10:18:58,279 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.io.tmpdir=/tmp
+2016-09-19 10:18:58,280 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:java.compiler=<NA>
+2016-09-19 10:18:58,284 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:os.name=Linux
+2016-09-19 10:18:58,284 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:os.arch=amd64
+2016-09-19 10:18:58,284 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:os.version=2.6.32-573.el6.x86_64
+2016-09-19 10:18:58,284 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:user.name=root
+2016-09-19 10:18:58,284 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:user.home=/root
+2016-09-19 10:18:58,284 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.Environment.logEnv(Environment.java:100)] Client environment:user.dir=/etc
+2016-09-19 10:18:58,285 (lifecycleSupervisor-1-9) [INFO - org.apache.zookeeper.ZooKeeper.<init>(ZooKeeper.java:438)] Initiating client connection, connectString=localhost:2181 sessionTimeout=5000 watcher=org.hbase.async.HBaseClient$ZKClient@9c809c5
+2016-09-19 10:18:58,287 (lifecycleSupervisor-1-5) [INFO - org.apache.zookeeper.ZooKeeper.<init>(ZooKeeper.java:438)] Initiating client connection, connectString=localhost:2181 sessionTimeout=5000 watcher=org.hbase.async.HBaseClient$ZKClient@16bdab45
+2016-09-19 10:18:58,287 (lifecycleSupervisor-1-1) [INFO - org.apache.zookeeper.ZooKeeper.<init>(ZooKeeper.java:438)] Initiating client connection, connectString=localhost:2181 sessionTimeout=5000 watcher=org.hbase.async.HBaseClient$ZKClient@7e374aac
+2016-09-19 10:18:58,317 (lifecycleSupervisor-1-5-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.logStartConnect(ClientCnxn.java:975)] Opening socket connection to server quickstart.cloudera/127.0.0.1:2181. Will not attempt to authenticate using SASL (unknown error)
+2016-09-19 10:18:58,321 (lifecycleSupervisor-1-5) [INFO - org.hbase.async.HBaseClient$ZKClient.getDeferredRoot(HBaseClient.java:2911)] Need to find the -ROOT- region
+2016-09-19 10:18:58,321 (lifecycleSupervisor-1-1-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.logStartConnect(ClientCnxn.java:975)] Opening socket connection to server quickstart.cloudera/127.0.0.1:2181. Will not attempt to authenticate using SASL (unknown error)
+2016-09-19 10:18:58,322 (lifecycleSupervisor-1-1-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.primeConnection(ClientCnxn.java:852)] Socket connection established, initiating session, client: /127.0.0.1:46986, server: quickstart.cloudera/127.0.0.1:2181
+2016-09-19 10:18:58,322 (lifecycleSupervisor-1-1) [INFO - org.hbase.async.HBaseClient$ZKClient.getDeferredRoot(HBaseClient.java:2911)] Need to find the -ROOT- region
+2016-09-19 10:18:58,322 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:475)] waiting on callback
+2016-09-19 10:18:58,322 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:475)] waiting on callback
+2016-09-19 10:18:58,327 (lifecycleSupervisor-1-9-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.logStartConnect(ClientCnxn.java:975)] Opening socket connection to server quickstart.cloudera/127.0.0.1:2181. Will not attempt to authenticate using SASL (unknown error)
+2016-09-19 10:18:58,328 (lifecycleSupervisor-1-9-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.primeConnection(ClientCnxn.java:852)] Socket connection established, initiating session, client: /127.0.0.1:46987, server: quickstart.cloudera/127.0.0.1:2181
+2016-09-19 10:18:58,329 (lifecycleSupervisor-1-5-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.primeConnection(ClientCnxn.java:852)] Socket connection established, initiating session, client: /127.0.0.1:46985, server: quickstart.cloudera/127.0.0.1:2181
+2016-09-19 10:18:58,330 (lifecycleSupervisor-1-9) [INFO - org.hbase.async.HBaseClient$ZKClient.getDeferredRoot(HBaseClient.java:2911)] Need to find the -ROOT- region
+2016-09-19 10:18:58,331 (lifecycleSupervisor-1-9) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:475)] waiting on callback
+2016-09-19 10:18:58,332 (lifecycleSupervisor-1-1-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.onConnected(ClientCnxn.java:1235)] Session establishment complete on server quickstart.cloudera/127.0.0.1:2181, sessionid = 0x156fefc68500116, negotiated timeout = 5000
+2016-09-19 10:18:58,333 (lifecycleSupervisor-1-5-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.onConnected(ClientCnxn.java:1235)] Session establishment complete on server quickstart.cloudera/127.0.0.1:2181, sessionid = 0x156fefc68500118, negotiated timeout = 5000
+2016-09-19 10:18:58,334 (lifecycleSupervisor-1-9-SendThread(quickstart.cloudera:2181)) [INFO - org.apache.zookeeper.ClientCnxn$SendThread.onConnected(ClientCnxn.java:1235)] Session establishment complete on server quickstart.cloudera/127.0.0.1:2181, sessionid = 0x156fefc68500117, negotiated timeout = 5000
+2016-09-19 10:18:58,382 (lifecycleSupervisor-1-9-EventThread) [INFO - org.hbase.async.HBaseClient$ZKClient$ZKCallback.handleMetaZnode(HBaseClient.java:3274)] Connecting to .META. region @ 127.0.0.1:60020
+2016-09-19 10:18:58,385 (lifecycleSupervisor-1-1-EventThread) [INFO - org.hbase.async.HBaseClient$ZKClient$ZKCallback.handleMetaZnode(HBaseClient.java:3274)] Connecting to .META. region @ 127.0.0.1:60020
+2016-09-19 10:18:58,386 (lifecycleSupervisor-1-5-EventThread) [INFO - org.hbase.async.HBaseClient$ZKClient$ZKCallback.handleMetaZnode(HBaseClient.java:3274)] Connecting to .META. region @ 127.0.0.1:60020
+2016-09-19 10:18:58,387 (lifecycleSupervisor-1-6) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Started SelectChannelConnector@0.0.0.0:44448
+2016-09-19 10:18:58,388 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: r1: Successfully registered new MBean.
+2016-09-19 10:18:58,388 (lifecycleSupervisor-1-6) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: r1 started
+2016-09-19 10:18:58,430 (lifecycleSupervisor-1-9-EventThread) [INFO - org.apache.zookeeper.ZooKeeper.close(ZooKeeper.java:684)] Session: 0x156fefc68500117 closed
+2016-09-19 10:18:58,430 (lifecycleSupervisor-1-9-EventThread) [INFO - org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:512)] EventThread shut down
+2016-09-19 10:18:58,430 (lifecycleSupervisor-1-1-EventThread) [INFO - org.apache.zookeeper.ZooKeeper.close(ZooKeeper.java:684)] Session: 0x156fefc68500116 closed
+2016-09-19 10:18:58,430 (lifecycleSupervisor-1-1-EventThread) [INFO - org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:512)] EventThread shut down
+2016-09-19 10:18:58,434 (lifecycleSupervisor-1-5-EventThread) [INFO - org.apache.zookeeper.ZooKeeper.close(ZooKeeper.java:684)] Session: 0x156fefc68500118 closed
+2016-09-19 10:18:58,434 (lifecycleSupervisor-1-5-EventThread) [INFO - org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:512)] EventThread shut down
+2016-09-19 10:18:58,490 (New I/O worker #1) [INFO - org.hbase.async.HBaseClient.discoverRegion(HBaseClient.java:2159)] Added client for region RegionInfo(table="t_us", region_name="t_us,,1474305270096.f791a1573851363992298522147f9c5f.", stop_key=""), which was added to the regions cache.  Now we know that RegionClient@2074917315(chan=[id: 0x546dedc8, /127.0.0.1:44598 => /127.0.0.1:60020], #pending_rpcs=0, #batched=0, #rpcs_inflight=0) is hosting 1 region.
+2016-09-19 10:18:58,490 (New I/O worker #3) [INFO - org.hbase.async.HBaseClient.discoverRegion(HBaseClient.java:2159)] Added client for region RegionInfo(table="t_india", region_name="t_india,,1474305295281.93f195b0203d4f0d792c6f6afaba1be9.", stop_key=""), which was added to the regions cache.  Now we know that RegionClient@1352125948(chan=[id: 0x13a65cf2, /127.0.0.1:44596 => /127.0.0.1:60020], #pending_rpcs=0, #batched=0, #rpcs_inflight=0) is hosting 1 region.
+2016-09-19 10:18:58,490 (New I/O worker #2) [INFO - org.hbase.async.HBaseClient.discoverRegion(HBaseClient.java:2159)] Added client for region RegionInfo(table="t_uk", region_name="t_uk,,1474305282119.14f7087cd59ea1d71add1cc8e060a8da.", stop_key=""), which was added to the regions cache.  Now we know that RegionClient@508855482(chan=[id: 0x1c6942e3, /127.0.0.1:44597 => /127.0.0.1:60020], #pending_rpcs=0, #batched=0, #rpcs_inflight=0) is hosting 1 region.
+2016-09-19 10:18:58,492 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:477)] callback received
+2016-09-19 10:18:58,493 (New I/O worker #2) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink$1.call(AsyncHBaseSink.java:461)] table found
+2016-09-19 10:18:58,518 (lifecycleSupervisor-1-9) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:477)] callback received
+2016-09-19 10:18:58,518 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink.initHBaseClient(AsyncHBaseSink.java:477)] callback received
+2016-09-19 10:18:58,493 (New I/O worker #3) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink$1.call(AsyncHBaseSink.java:461)] table found
+2016-09-19 10:18:58,518 (New I/O worker #1) [INFO - org.apache.flume.sink.hbase.AsyncHBaseSink$1.call(AsyncHBaseSink.java:461)] table found
+
+
+6.6. Lanzamos un curl con un HTTP
+
+[root@quickstart conf]# curl -X POST -d '[{  "headers" : { "timestamp" : "434324343", "host" :"random_host.example.com", "field1" : "val1"},  "body" : "Prueba channel selector"  }]' localhost:44448
+
+El resultado es que no vemos nada por salida estandar, y se ha copiado el registro en las 3 tablas de HBase:
+
+hbase(main):004:0> scan 't_us'
+ROW                                        COLUMN+CELL                                                                                                                 
+ default910f1a7c-990c-4c27-b21b-22ce3f9bdf column=cf_us:pCol, timestamp=1474305784608, value=Prueba channel selector                                                   
+ 5a                                                                                                                                                                    
+ incRow                                    column=cf_us:iCol, timestamp=1474305784608, value=\x00\x00\x00\x00\x00\x00\x00\x01                                          
+2 row(s) in 0.2100 seconds
+
+hbase(main):005:0> scan 't_uk'
+ROW                                        COLUMN+CELL                                                                                                                 
+ defaultca12b478-e557-41cb-8c5c-2e9fa6262d column=cf_uk:pCol, timestamp=1474305784603, value=Prueba channel selector                                                   
+ 02                                                                                                                                                                    
+ incRow                                    column=cf_uk:iCol, timestamp=1474305784607, value=\x00\x00\x00\x00\x00\x00\x00\x01                                          
+2 row(s) in 0.0160 seconds
+
+hbase(main):006:0> scan 't_india'
+ROW                                        COLUMN+CELL                                                                                                                 
+ default47ca7350-2bd3-49ae-81fa-ae9319c108 column=cf_india:pCol, timestamp=1474305784609, value=Prueba channel selector                                                
+ 5c                                                                                                                                                                    
+ incRow                                    column=cf_india:iCol, timestamp=1474305784608, value=\x00\x00\x00\x00\x00\x00\x00\x01                                       
+2 row(s) in 0.0190 seconds
+
+
+
+El problema es que no habiamos configurado bien el interceptor. Se debe llamar r1 no source1. Lo actualizamos:
+
+flumeChannelSelectortoHBASE.conf:
+
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1 k2 k3
+a1.channels = c1 c2 c3
+
+# Describe/configure the source
+a1.sources.r1.type =  http
+a1.sources.r1.port = 44448
+a1.sources.r1.channels = c1 c2 c3
+
+a1.sources.r1.interceptors = i1
+a1.sources.r1.interceptors.i1.type = com.mbit.interceptors.CustomLocationInterceptor$Builder
+
+a1.sources.r1.selector.type = multiplexing
+a1.sources.r1.selector.header = location
+a1.sources.r1.selector.mapping.US = c1
+a1.sources.r1.selector.mapping.UK = c2
+a1.sources.r1.selector.mapping.INDIA = c3
+a1.sources.r1.selector.default = c1
+
+
+# Describe the sink 1
+a1.sinks.k1.type = asynchbase
+a1.sinks.k1.table = t_us
+a1.sinks.k1.columnFamily = cf_us
+a1.sinks.k1.enableWal = false
+# Describe the sink 2
+a1.sinks.k2.type = asynchbase
+a1.sinks.k2.table = t_uk
+a1.sinks.k2.columnFamily = cf_uk
+a1.sinks.k2.enableWal = false
+# Describe the sink 3
+a1.sinks.k3.type = asynchbase
+a1.sinks.k3.table = t_india
+a1.sinks.k3.columnFamily = cf_india
+a1.sinks.k3.enableWal = false
+
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+a1.channels.c3.type = memory
+a1.channels.c3.capacity = 1000
+a1.channels.c3.transactionCapacity = 100
+
+
+# Bind sink to the channel
+a1.sinks.k1.channel = c1
+a1.sinks.k2.channel = c2
+a1.sinks.k3.channel = c3
+
+
+Y lo volvemos a lanzar, tanto el ajente como el curl:
+
+[root@quickstart conf]# curl -X POST -d '[{  "headers" : { "timestamp" : "434324343", "host" :"random_host.example.com", "field1" : "val1"},  "body" : "Prueba correcta selector"  }]' localhost:44448
+
+Y vemos en la salida nuestras trazas:
+
+--->body:[B@24800c3a
+--->headers:{timestamp=434324343, host=random_host.example.com, location=US, field1=val1}
+
+
+Por ultimo revisamos si se ha copiado a la tabla correcta:
+
+hbase(main):007:0> scan 't_us'
+ROW                                        COLUMN+CELL                                                                                                                 
+ default910f1a7c-990c-4c27-b21b-22ce3f9bdf column=cf_us:pCol, timestamp=1474305784608, value=Prueba channel selector                                                   
+ 5a                                                                                                                                                                    
+ defaulta97d4fe0-4dc8-4441-845a-8d3ad03032 column=cf_us:pCol, timestamp=1474306194897, value=Prueba correcta selector                                                  
+ f0                                                                                                                                                                    
+ incRow                                    column=cf_us:iCol, timestamp=1474306194897, value=\x00\x00\x00\x00\x00\x00\x00\x02                                          
+3 row(s) in 0.0260 seconds
+
+hbase(main):008:0> scan 't_uk'
+ROW                                        COLUMN+CELL                                                                                                                 
+ defaultca12b478-e557-41cb-8c5c-2e9fa6262d column=cf_uk:pCol, timestamp=1474305784603, value=Prueba channel selector                                                   
+ 02                                                                                                                                                                    
+ incRow                                    column=cf_uk:iCol, timestamp=1474305784607, value=\x00\x00\x00\x00\x00\x00\x00\x01                                          
+2 row(s) in 0.0170 seconds
+
+hbase(main):009:0> scan 't_india'
+ROW                                        COLUMN+CELL                                                                                                                 
+ default47ca7350-2bd3-49ae-81fa-ae9319c108 column=cf_india:pCol, timestamp=1474305784609, value=Prueba channel selector                                                
+ 5c                                                                                                                                                                    
+ incRow                                    column=cf_india:iCol, timestamp=1474305784608, value=\x00\x00\x00\x00\x00\x00\x00\x01                                       
+2 row(s) in 0.0210 seconds
+
+
+Y efectivamente solo ha ido por el channel1 y solo se ha copiado a la tabla t_us
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+
+

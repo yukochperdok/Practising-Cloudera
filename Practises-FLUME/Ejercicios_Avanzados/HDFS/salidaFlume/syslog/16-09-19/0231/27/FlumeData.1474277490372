@@ -1,0 +1,2 @@
+postfix/pickup[7707]: warning: inet_protocols: IPv6 support is disabled: Address family not supported by protocol
+postfix/pickup[7707]: warning: inet_protocols: configuring for IPv4 support only
