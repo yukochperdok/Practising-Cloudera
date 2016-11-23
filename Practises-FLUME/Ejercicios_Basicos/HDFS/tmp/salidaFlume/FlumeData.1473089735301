@@ -1,0 +1,2 @@
+Sep  5 08:35:35 quickstart sudo: cloudera : TTY=pts/2 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more /var/log/secure
+Sep  5 08:36:01 quickstart sudo: cloudera : TTY=pts/2 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more /var/log/secure

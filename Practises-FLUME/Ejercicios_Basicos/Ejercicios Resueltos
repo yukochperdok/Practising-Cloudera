@@ -1,0 +1,392 @@
+0.1 -  Miramos en el directorio de entrada los ficheros
+[cloudera@quickstart ~]$ cd /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare
+[cloudera@quickstart shakespeare]$ ls -ltr
+total 3252
+-rw-r--r-- 1 cloudera cloudera 1479035 Sep 24  2010 histories
+-rw-r--r-- 1 cloudera cloudera   58976 Sep 24  2010 glossary
+-rw-r--r-- 1 cloudera cloudera 1784616 Sep 24  2010 comedies
+[cloudera@quickstart shakespeare]$ tail -f glossary
+YELLOWS	a disease of horses
+YEOMAN	a sheriff's officer
+YIELD	to reward
+	To report
+YOND	and yonder
+YOUNKER	tyro
+
+
+ZANY	a clown, gull
+	[END]
+
+
+
+^C
+[cloudera@quickstart shakespeare]$ more histories
+
+
+
+	1 KING HENRY IV
+
+
+	DRAMATIS PERSONAE
+
+
+KING HENRY	the Fourth. (KING HENRY IV:)
+
+
+HENRY,
+Prince of Wales	(PRINCE HENRY:)	|
+		| sons of the King
+JOHN of Lancaster	(LANCASTER:)	|
+
+
+WESTMORELAND:
+
+SIR WALTER BLUNT:
+
+THOMAS PERCY	Earl of Worcester. (EARL OF WORCESTER:)
+
+HENRY PERCY	Earl of Northumberland. (NORTHUMBERLAND:)
+
+HENRY PERCY	surnamed HOTSPUR, his son. (HOTSPUR:)
+
+EDMUND MORTIMER	Earl of March. (MORTIMER:)
+
+RICHARD SCROOP	Archbishop of York. (ARCHBISHOP OF YORK:)
+
+ARCHIBALD	Earl of Douglas. (DOUGLAS:)
+
+OWEN GLENDOWER:
+
+SIR RICHARD VERNON	(VERNON:)
+
+--More--(0%)
+
+
+
+0.2 - Revisamos que este instalado flume en la maquina
+
+[cloudera@quickstart ~]$ flume-ng
+Error: Unknown or unspecified command ''
+
+Usage: /usr/lib/flume-ng/bin/flume-ng <command> [options]...
+
+commands:
+  help                      display this help text
+  agent                     run a Flume agent
+  avro-client               run an avro Flume client
+  version                   show Flume version info
+
+global options:
+  --conf,-c <conf>          use configs in <conf> directory
+  --classpath,-C <cp>       append to the classpath
+  --dryrun,-d               do not actually start Flume, just print the command
+  --plugins-path <dirs>     colon-separated list of plugins.d directories. See the
+                            plugins.d section in the user guide for more details.
+                            Default: $FLUME_HOME/plugins.d
+  -Dproperty=value          sets a Java system property value
+  -Xproperty=value          sets a Java -X option
+
+agent options:
+  --name,-n <name>          the name of this agent (required)
+  --conf-file,-f <file>     specify a config file (required if -z missing)
+  --zkConnString,-z <str>   specify the ZooKeeper connection to use (required if -f missing)
+  --zkBasePath,-p <path>    specify the base path in ZooKeeper for agent configs
+  --no-reload-conf          do not reload config file if changed
+  --help,-h                 display help text
+
+avro-client options:
+  --rpcProps,-P <file>   RPC client properties file with server connection params
+  --host,-H <host>       hostname to which events will be sent
+  --port,-p <port>       port of the avro source
+  --dirname <dir>        directory to stream to avro source
+  --filename,-F <file>   text file to stream to avro source (default: std input)
+  --headerFile,-R <file> File containing event headers as key/value pairs on each new line
+  --help,-h              display help text
+
+  Either --rpcProps or both --host and --port must be specified.
+
+Note that if <conf> directory is specified, then it is always included first
+in the classpath.
+
+
+0.3 - Eliminamos si las hubiera las anteriores pruebas:
+
+[cloudera@quickstart ~]$ hdfs dfs -ls /tmp/salidaFlume/
+Found 4 items
+-rw-r--r--   1 root supergroup    1782603 2016-05-21 01:30 /tmp/salidaFlume/FlumeData.1463819421712
+-rw-r--r--   1 root supergroup    1784616 2016-05-21 01:30 /tmp/salidaFlume/FlumeData.1463819426145
+-rw-r--r--   1 root supergroup    1538011 2016-05-21 01:33 /tmp/salidaFlume/FlumeData.1463819572011
+-rw-r--r--   1 root supergroup       1628 2016-05-21 02:53 /tmp/salidaFlume/FlumeData.1463824390897
+[cloudera@quickstart ~]$ hdfs dfs -tail /tmp/salidaFlume/FlumeData.1463819421712
+ugh and there
+	My mate, that's never to be found again,
+	Lament till I am lost.
+
+LEONTES	O, peace, Paulina!
+	Thou shouldst a husband take by my consent,
+	As I by thine a wife: this is a match,
+	And made between's by vows. Thou hast found mine;
+	But how, is to be question'd; for I saw her,
+	As I thought, dead, and have in vain said many
+	A prayer upon her grave. I'll not seek far--
+	For him, I partly know his mind--to find thee
+	An honourable husband. Come, Camillo,
+	And take her by the hand, whose worth and honesty
+	Is richly noted and here justified
+	By us, a pair of kings. Let's from this place.
+	What! look upon my brother: both your pardons,
+	That e'er I put between your holy looks
+	My ill suspicion. This is your son-in-law,
+	And son unto the king, who, heavens directing,
+	Is troth-plight to your daughter. Good Paulina,
+	Lead us from hence, where we may leisurely
+	Each one demand an answer to his part
+	Perform'd in this wide gap of time since first
+	We were dissever'd: hastily lead away.
+
+	[Exeunt]
+	[END]
+[cloudera@quickstart ~]$ hdfs dfs -rm -r /tmp/salidaFlume
+Deleted /tmp/salidaFlume
+[cloudera@quickstart ~]$ hdfs dfs -ls /tmp/salidaFlume
+ls: `/tmp/salidaFlume': No such file or directory
+
+
+1. PRIMERA PRUEBA
+1.1 Editamos el fichero de configuracion que se llamara /etc/flume-ng/conf/flumebit.conf.
+
+Creamos un source de tipo spooldir, un channel memory y un sink hdfs:
+agent.sources = seqGenSrc
+agent.channels = memoryChannel
+agent.sinks = loggerSink
+...
+agent.sources.seqGenSrc.type = spooldir
+agent.sources.seqGenSrc.channels = memoryChannel
+...
+agent.sinks.loggerSink.type = hdfs
+agent.sinks.loggerSink.channel = memoryChannel
+...
+agent.channels.memoryChannel.type = memory
+
+Incluyendo estos valores al sink
+agent.sinks.loggerSink.hdfs.rollInterval = 30
+agent.sinks.loggerSink.hdfs.rollSize = 134217728
+agent.sinks.loggerSink.hdfs.rollCount = 0
+agent.sinks.loggerSink.hdfs.fileType = DataStream
+agent.sinks.loggerSink.hdfs.writeFormat = Text
+
+
+1.2. Lanzamos el agente
+sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebit.conf --name agent -Dflume.root.logger=INFO,console
+
+
+
+[cloudera@quickstart shakespeare]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebit.conf --name agent -Dflume.root.logger=INFO,console
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:........<<MUCHAS LIBRERIAS>>................/lib/native/Linux-amd64-64 org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumebit.conf --name agent
+2016-09-05 06:12:19,472 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-05 06:12:19,479 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumebit.conf
+2016-09-05 06:12:19,484 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,484 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,484 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: loggerSink Agent: agent
+2016-09-05 06:12:19,485 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,485 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,485 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,485 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,485 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,485 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 06:12:19,509 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [agent]
+2016-09-05 06:12:19,510 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-05 06:12:19,523 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel memoryChannel type memory
+2016-09-05 06:12:19,583 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel memoryChannel
+2016-09-05 06:12:19,584 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source seqGenSrc, type spooldir
+2016-09-05 06:12:19,597 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: loggerSink, type: hdfs
+2016-09-05 06:12:19,607 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel memoryChannel connected to [seqGenSrc, loggerSink]
+2016-09-05 06:12:19,615 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{seqGenSrc=EventDrivenSourceRunner: { source:Spool Directory source seqGenSrc: { spoolDir: /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/ } }} sinkRunners:{loggerSink=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@ebaa6ba counterGroup:{ name:null counters:{} } }} channels:{memoryChannel=org.apache.flume.channel.MemoryChannel{name: memoryChannel}} }
+2016-09-05 06:12:19,628 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel memoryChannel
+2016-09-05 06:12:19,673 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: memoryChannel: Successfully registered new MBean.
+2016-09-05 06:12:19,673 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: memoryChannel started
+2016-09-05 06:12:19,673 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink loggerSink
+2016-09-05 06:12:19,676 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: loggerSink: Successfully registered new MBean.
+2016-09-05 06:12:19,676 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: loggerSink started
+2016-09-05 06:12:19,676 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source seqGenSrc
+2016-09-05 06:12:19,677 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.source.SpoolDirectorySource.start(SpoolDirectorySource.java:78)] SpoolDirectorySource source starting with directory: /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/
+2016-09-05 06:12:19,698 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: seqGenSrc: Successfully registered new MBean.
+2016-09-05 06:12:19,699 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: seqGenSrc started
+2016-09-05 06:12:19,978 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-05 06:12:20,302 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume//FlumeData.1473081139979.tmp
+2016-09-05 06:12:24,774 (pool-6-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.readEvents(ReliableSpoolingFileEventReader.java:258)] Last read took us just up to a file boundary. Rolling to the next file, if there is one.
+2016-09-05 06:12:24,774 (pool-6-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.rollCurrentFile(ReliableSpoolingFileEventReader.java:348)] Preparing to move file /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/comedies to /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/comedies.COMPLETED
+2016-09-05 06:12:27,777 (pool-6-thread-1) [WARN - org.apache.flume.source.SpoolDirectorySource$SpoolDirectoryRunnable.run(SpoolDirectorySource.java:239)] The channel is full, and cannot write data now. The source will try again after 250 milliseconds
+2016-09-05 06:12:28,028 (pool-6-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.readEvents(ReliableSpoolingFileEventReader.java:238)] Last read was never committed - resetting mark position.
+2016-09-05 06:12:28,078 (pool-6-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.readEvents(ReliableSpoolingFileEventReader.java:258)] Last read took us just up to a file boundary. Rolling to the next file, if there is one.
+2016-09-05 06:12:28,078 (pool-6-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.rollCurrentFile(ReliableSpoolingFileEventReader.java:348)] Preparing to move file /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/glossary to /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/glossary.COMPLETED
+2016-09-05 06:12:32,856 (pool-6-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.readEvents(ReliableSpoolingFileEventReader.java:258)] Last read took us just up to a file boundary. Rolling to the next file, if there is one.
+2016-09-05 06:12:32,856 (pool-6-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.rollCurrentFile(ReliableSpoolingFileEventReader.java:348)] Preparing to move file /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/histories to /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare/histories.COMPLETED
+2016-09-05 06:12:51,846 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume//FlumeData.1473081139979.tmp
+2016-09-05 06:12:51,871 (hdfs-loggerSink-call-runner-1) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/FlumeData.1473081139979.tmp to /tmp/salidaFlume/FlumeData.1473081139979
+2016-09-05 06:12:51,881 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+1.3. Verificamos los ficheros de salida:
+[cloudera@quickstart shakespeare]$ hdfs dfs -ls /tmp/salidaFlume
+Found 1 items
+-rw-r--r--   1 root supergroup    3322627 2016-09-05 08:17 /tmp/salidaFlume/FlumeData.1473088603885
+
+OBS: Este archivo tiene los 3 archivos completados en uno solo:
+[cloudera@quickstart shakespeare]$ ls -ltr /home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare
+total 3252
+-rw-r--r-- 1 cloudera cloudera 1479035 Sep 24  2010 histories.COMPLETED
+-rw-r--r-- 1 cloudera cloudera   58976 Sep 24  2010 glossary.COMPLETED
+-rw-r--r-- 1 cloudera cloudera 1784616 Sep 24  2010 comedies.COMPLETED
+
+
+
+2. SEGUNDA PRUEBA
+2.1 Editamos el fichero de configuracion que se llamara /etc/flume-ng/conf/flumebitTail.conf.
+
+Modificamos el source de tipo spooldir a tipo exec ejecutando un tail -f sobre el archivo /var/log/secure
+agent.sources.seqGenSrc.type = exec
+agent.sources.seqGenSrc.command = sudo tail -f /var/log/secure
+
+Este archivo sus ultimas entradas son estas:
+[cloudera@quickstart shakespeare]$ sudo cat /var/log/secure
+Sep  5 08:16:24 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/usr/bin/flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebit.conf --name agent -Dflume.root.logger=INFO,console
+Sep  5 08:24:54 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more /var/log/secure
+Sep  5 08:26:11 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/cat /var/log/secure
+
+
+2.2 Ejecutamos el agente apuntando al nuevo config en una terminal
+sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebitTail.conf --name agent -Dflume.root.logger=INFO,console
+
+2.3 En otra terminal vamos ejecutando instrucciones y monitorizando el archivo. Realmente lo que vemos es que a medida que vamos lanzando instrucciones y se van almacenando en el archivo secure van creandose nuevos archivos en el HDFS.
+
+[cloudera@quickstart shakespeare]$ hdfs dfs -tail -f /tmp/salidaFlume/FlumeData.1473089230167
+ercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/usr/bin/flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebit.conf --name agent -Dflume.root.logger=INFO,console
+Sep  5 08:24:54 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more /var/log/secure
+Sep  5 08:26:11 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/cat /var/log/secure
+Sep  5 08:26:47 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/usr/bin/flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebitTail.conf --name agent -Dflume.root.logger=INFO,console
+Sep  5 08:27:06 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/usr/bin/tail -f /var/log/secure
+
+
+[cloudera@quickstart shakespeare]$ hdfs dfs -ls /tmp/salidaFlume
+Found 3 items
+-rw-r--r--   1 root supergroup    3322627 2016-09-05 08:17 /tmp/salidaFlume/FlumeData.1473088603885
+-rw-r--r--   1 root supergroup       1115 2016-09-05 08:27 /tmp/salidaFlume/FlumeData.1473089230167
+-rw-r--r--   1 root supergroup        175 2016-09-05 08:30 /tmp/salidaFlume/FlumeData.1473089404468
+[cloudera@quickstart shakespeare]$ hdfs dfs -cat /tmp/salidaFlume/FlumeData.1473089404468
+Sep  5 08:30:00 quickstart sudo: cloudera : TTY=pts/1 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more /var/log/secure
+
+[cloudera@quickstart shakespeare]$ hdfs dfs -ls /tmp/salidaFlume
+Found 5 items
+-rw-r--r--   1 root supergroup    3322627 2016-09-05 08:17 /tmp/salidaFlume/FlumeData.1473088603885
+-rw-r--r--   1 root supergroup       1115 2016-09-05 08:27 /tmp/salidaFlume/FlumeData.1473089230167
+-rw-r--r--   1 root supergroup        175 2016-09-05 08:30 /tmp/salidaFlume/FlumeData.1473089404468
+-rw-r--r--   1 root supergroup        350 2016-09-05 08:36 /tmp/salidaFlume/FlumeData.1473089735301
+-rw-r--r--   1 root supergroup        342 2016-09-05 08:36 /tmp/salidaFlume/FlumeData.1473089773616
+[cloudera@quickstart shakespeare]$ hdfs dfs -cat /tmp/salidaFlume/FlumeData.1473089773616
+Sep  5 08:36:12 quickstart sudo: cloudera : TTY=pts/2 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more prueba2
+Sep  5 08:36:16 quickstart sudo: cloudera : TTY=pts/2 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more /var/log/secure
+
+
+2.4. La salida del agente seria esta (quitando la parte de las librerias):
+
+[cloudera@quickstart shakespeare]$ sudo flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebitTail.conf --name agent -Dflume.root.logger=INFO,console
+Info: Including Hadoop libraries found via (/usr/bin/hadoop) for HDFS access
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Including HBASE libraries found via (/usr/bin/hbase) for HBASE access
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hbase/bin/../lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/hadoop/lib/slf4j-log4j12.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-api-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12-1.7.5.jar from classpath
+Info: Excluding /usr/lib/zookeeper/lib/slf4j-log4j12.jar from classpath
+Info: Including Hive libraries found via () for Hive access
++ exec /usr/java/jdk1.7.0_67-cloudera/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/etc/flume-ng/conf:/usr/lib/flume-ng/lib/*:/etc/hadoop/conf:/usr/lib/hadoop/lib/activation-1.1.jar:/usr/lib/hadoop/lib/apacheds-i18n-2.0.0-M15.jar:.......<<LIB ELIMINADAS>>../lib/native/Linux-amd64-64 org.apache.flume.node.Application --conf-file /etc/flume-ng/conf/flumebitTail.conf --name agent
+2016-09-05 08:27:05,693 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider.start(PollingPropertiesFileConfigurationProvider.java:61)] Configuration provider starting
+2016-09-05 08:27:05,709 (conf-file-poller-0) [INFO - org.apache.flume.node.PollingPropertiesFileConfigurationProvider$FileWatcherRunnable.run(PollingPropertiesFileConfigurationProvider.java:133)] Reloading configuration file:/etc/flume-ng/conf/flumebitTail.conf
+2016-09-05 08:27:05,724 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,726 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,726 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:931)] Added sinks: loggerSink Agent: agent
+2016-09-05 08:27:05,727 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,727 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,728 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,728 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,729 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,729 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration$AgentConfiguration.addProperty(FlumeConfiguration.java:1017)] Processing:loggerSink
+2016-09-05 08:27:05,790 (conf-file-poller-0) [INFO - org.apache.flume.conf.FlumeConfiguration.validateConfiguration(FlumeConfiguration.java:141)] Post-validation flume configuration contains configuration for agents: [agent]
+2016-09-05 08:27:05,790 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:145)] Creating channels
+2016-09-05 08:27:05,812 (conf-file-poller-0) [INFO - org.apache.flume.channel.DefaultChannelFactory.create(DefaultChannelFactory.java:42)] Creating instance of channel memoryChannel type memory
+2016-09-05 08:27:05,835 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.loadChannels(AbstractConfigurationProvider.java:200)] Created channel memoryChannel
+2016-09-05 08:27:05,837 (conf-file-poller-0) [INFO - org.apache.flume.source.DefaultSourceFactory.create(DefaultSourceFactory.java:41)] Creating instance of source seqGenSrc, type exec
+2016-09-05 08:27:05,867 (conf-file-poller-0) [INFO - org.apache.flume.sink.DefaultSinkFactory.create(DefaultSinkFactory.java:42)] Creating instance of sink: loggerSink, type: hdfs
+2016-09-05 08:27:05,895 (conf-file-poller-0) [INFO - org.apache.flume.node.AbstractConfigurationProvider.getConfiguration(AbstractConfigurationProvider.java:114)] Channel memoryChannel connected to [seqGenSrc, loggerSink]
+2016-09-05 08:27:05,914 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:138)] Starting new configuration:{ sourceRunners:{seqGenSrc=EventDrivenSourceRunner: { source:org.apache.flume.source.ExecSource{name:seqGenSrc,state:IDLE} }} sinkRunners:{loggerSink=SinkRunner: { policy:org.apache.flume.sink.DefaultSinkProcessor@32089335 counterGroup:{ name:null counters:{} } }} channels:{memoryChannel=org.apache.flume.channel.MemoryChannel{name: memoryChannel}} }
+2016-09-05 08:27:05,941 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:145)] Starting Channel memoryChannel
+2016-09-05 08:27:06,071 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: CHANNEL, name: memoryChannel: Successfully registered new MBean.
+2016-09-05 08:27:06,072 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: CHANNEL, name: memoryChannel started
+2016-09-05 08:27:06,073 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:173)] Starting Sink loggerSink
+2016-09-05 08:27:06,074 (conf-file-poller-0) [INFO - org.apache.flume.node.Application.startAllComponents(Application.java:184)] Starting Source seqGenSrc
+2016-09-05 08:27:06,075 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.source.ExecSource.start(ExecSource.java:169)] Exec source starting with command:sudo tail -f /var/log/secure
+2016-09-05 08:27:06,078 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SINK, name: loggerSink: Successfully registered new MBean.
+2016-09-05 08:27:06,078 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SINK, name: loggerSink started
+2016-09-05 08:27:06,145 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: seqGenSrc: Successfully registered new MBean.
+2016-09-05 08:27:06,145 (lifecycleSupervisor-1-1) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: seqGenSrc started
+2016-09-05 08:27:10,166 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-05 08:27:10,890 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume//FlumeData.1473089230167.tmp
+2016-09-05 08:27:44,941 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume//FlumeData.1473089230167.tmp
+2016-09-05 08:27:44,995 (hdfs-loggerSink-call-runner-8) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/FlumeData.1473089230167.tmp to /tmp/salidaFlume/FlumeData.1473089230167
+2016-09-05 08:27:45,007 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+2016-09-05 08:30:04,468 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-05 08:30:04,547 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume//FlumeData.1473089404468.tmp
+2016-09-05 08:30:34,653 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume//FlumeData.1473089404468.tmp
+2016-09-05 08:30:34,673 (hdfs-loggerSink-call-runner-3) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/FlumeData.1473089404468.tmp to /tmp/salidaFlume/FlumeData.1473089404468
+2016-09-05 08:30:34,677 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+2016-09-05 08:35:35,300 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-05 08:35:35,379 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume//FlumeData.1473089735301.tmp
+2016-09-05 08:36:05,473 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume//FlumeData.1473089735301.tmp
+2016-09-05 08:36:05,500 (hdfs-loggerSink-call-runner-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/FlumeData.1473089735301.tmp to /tmp/salidaFlume/FlumeData.1473089735301
+2016-09-05 08:36:05,505 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+2016-09-05 08:36:13,615 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-05 08:36:13,683 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume//FlumeData.1473089773616.tmp
+2016-09-05 08:36:43,764 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume//FlumeData.1473089773616.tmp
+2016-09-05 08:36:43,779 (hdfs-loggerSink-call-runner-6) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/FlumeData.1473089773616.tmp to /tmp/salidaFlume/FlumeData.1473089773616
+2016-09-05 08:36:43,784 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+2016-09-05 08:38:17,532 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSDataStream.configure(HDFSDataStream.java:58)] Serializer = TEXT, UseRawLocalFileSystem = false
+2016-09-05 08:38:17,618 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating /tmp/salidaFlume//FlumeData.1473089897533.tmp
+2016-09-05 08:38:47,703 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing /tmp/salidaFlume//FlumeData.1473089897533.tmp
+2016-09-05 08:38:47,726 (hdfs-loggerSink-call-runner-1) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming /tmp/salidaFlume/FlumeData.1473089897533.tmp to /tmp/salidaFlume/FlumeData.1473089897533
+2016-09-05 08:38:47,731 (hdfs-loggerSink-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+
+
+
+
+
+
+
+

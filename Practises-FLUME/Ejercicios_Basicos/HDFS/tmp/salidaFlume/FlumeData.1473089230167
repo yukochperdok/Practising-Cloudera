@@ -1,0 +1,5 @@
+Sep  5 08:16:24 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/usr/bin/flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebit.conf --name agent -Dflume.root.logger=INFO,console
+Sep  5 08:24:54 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/more /var/log/secure
+Sep  5 08:26:11 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/bin/cat /var/log/secure
+Sep  5 08:26:47 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/usr/bin/flume-ng agent --conf /etc/flume-ng/conf --conf-file /etc/flume-ng/conf/flumebitTail.conf --name agent -Dflume.root.logger=INFO,console
+Sep  5 08:27:06 quickstart sudo: cloudera : TTY=pts/0 ; PWD=/home/cloudera/Desktop/Curso/Ejercicios_Fernando/FLUME/shakespeare ; USER=root ; COMMAND=/usr/bin/tail -f /var/log/secure
